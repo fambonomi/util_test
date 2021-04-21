@@ -22,6 +22,12 @@
  * en este caso puesto que las pruebas unitarias no podrán ejecutarse hasta que sea implementada la historia correspondiente.
  *
  * 2021-04-20 22:23 Pasa pruebas de aceptación Historia Inicializa
+ * 2021-04-21 00:12
+ * 	+ STUB para simplificar la escritura de stubs que no hacen nada
+ * 	+ Modificación de los nombres para adaptarse a convención
+ * 	+ BeforeTest (inicialización solamente)
+ * 	+ AfterTest (inicialización solamente)
+ * 2021-04-21 00:34
  */
 
 #include <test.h>
@@ -30,29 +36,21 @@
 
 static TestGroup grupo;
 
-static void inicializador_de_grupo(TestGroup *tg)
-{
-	(void) tg;
+#define STUB(nombre) static void nombre(TestGroup *tg)\
+{\
+	(void) tg;\
 }
 
-static void finalizador_de_grupo(TestGroup *tg)
-{
-	(void) tg;
-}
-
-static void siempre_exitosa(TestGroup *tg)
-{
-	(void) tg;
-}
-
-static void stub_prueba(TestGroup *tg)
-{
-	(void) tg;
-}
+STUB(inicializadorDeGrupo)
+STUB(finalizadorDeGrupo)
+STUB(inicializadorDePrueba)
+STUB(finalizadorDePrueba)
+STUB(pruebaSiempreExitosa)
+STUB(pruebaStub)
 
 static TestDescriptor pruebas[]={
-		{"Prueba que siempre es exitosa",siempre_exitosa},
-		{"Prueba stub, siempre exitosa", stub_prueba}
+		{"Prueba que siempre es exitosa",pruebaSiempreExitosa},
+		{"Prueba stub, siempre exitosa", pruebaStub}
 };
 
 static int numPruebas = sizeof(pruebas)/sizeof(*pruebas);
@@ -115,23 +113,31 @@ int testRun_TestGroup(void)
 	printf("%d pruebas definidas\n",numPruebas);
 
 	rellenaConValorTestigo(&grupo,sizeof(grupo));
+
 	TG_init(&grupo);
 	if(memoriaConservaTestigo(&grupo, sizeof(grupo)))
 		reportaFalla("No se ha inicializado la memoria de grupo de prueba!");
 
-	TG_doBeforeGroup(&grupo, inicializador_de_grupo);
-	if(!existePunteroFnEnMemoria(&grupo,sizeof(grupo),inicializador_de_grupo))
-		reportaFalla("No existe puntero al inicializador de grupo en el estado de grupo de prueba!");
+	TG_doBeforeGroup(&grupo, inicializadorDeGrupo);
+	TG_doAfterGroup(&grupo, finalizadorDeGrupo);
+
+	TG_doBeforeTest(&grupo,inicializadorDePrueba);
+	TG_doAfterTest(&grupo,finalizadorDePrueba);
 
 	TG_setTests(&grupo,pruebas,numPruebas);
+
+	if(!existePunteroFnEnMemoria(&grupo,sizeof(grupo),inicializadorDeGrupo))
+		reportaFalla("No existe puntero al inicializador de grupo en el estado de grupo de prueba!");
+	if (!existePunteroFnEnMemoria(&grupo, sizeof(grupo), finalizadorDeGrupo))
+		reportaFalla("No existe puntero al finalizador de grupo en el estado de grupo de prueba!");
+	if(!existePunteroFnEnMemoria(&grupo, sizeof(grupo), inicializadorDePrueba))
+		reportaFalla("No existe puntero al inicializador de prueba en el estado de grupo de prueba!");
+	if(!existePunteroFnEnMemoria(&grupo, sizeof(grupo), finalizadorDePrueba))
+		reportaFalla("No existe puntero al finalizador de prueba en el estado de grupo de prueba!");
 	if (!existePunteroDatoEnMemoria(&grupo, sizeof(grupo), pruebas))
 		reportaFalla("No existe puntaro a lista de pruebas en el estado de grupo de prueba!");
 	if (!existePatronEnMemoria(&grupo,sizeof(grupo),&numPruebas,sizeof(numPruebas)))
 		reportaFalla("Numero de pruebas no existe en el estado de grupo de prueba!");
-
-	TG_doAfterGroup(&grupo, finalizador_de_grupo);
-	if (!existePunteroFnEnMemoria(&grupo, sizeof(grupo), finalizador_de_grupo))
-		reportaFalla("No existe puntero al finalizador de grupo en el estado de grupo de prueba!");
 
 	return falla;
 }

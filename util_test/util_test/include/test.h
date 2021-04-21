@@ -29,6 +29,8 @@ typedef struct TestGroup
 {
 	TG_Before beforeGroup;
 	TG_After afterGroup;
+	TG_Before beforeTest;
+	TG_After afterTest;
 	TestDescriptor *tests;
 	int numTests;
 }TestGroup;
@@ -37,7 +39,8 @@ void TG_init(TestGroup *self);
 
 void TG_doBeforeGroup(TestGroup *self, TG_Before beginGroup);
 void TG_doAfterGroup(TestGroup *self, TG_After afterGroup);
-
+void TG_doBeforeTest(TestGroup *self,TG_Before beforeTest);
+void TG_doAfterTest(TestGroup *self,TG_After afterTest);
 void TG_setTests(TestGroup *self, TestDescriptor *tests, int numTests);
 
 #endif /* INCLUDE_TEST_H_ */

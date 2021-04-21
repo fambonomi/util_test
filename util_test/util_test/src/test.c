@@ -29,3 +29,12 @@ void TG_doAfterGroup(TestGroup *self, TG_After afterGroup)
 {
 	self->afterGroup = afterGroup;
 }
+void TG_doBeforeTest(TestGroup *self,TG_Before beforeTest)
+{
+	self->beforeTest = beforeTest;
+}
+
+void TG_doAfterTest(TestGroup *self,TG_After afterTest)
+{
+	self->afterTest=afterTest;
+}
