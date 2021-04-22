@@ -29,28 +29,33 @@ typedef struct TestDescriptor{
 typedef struct TestGroup
 {
 	const char * groupName;
-	TG_Before beforeGroup;
-	TG_After afterGroup;
-	TG_Before beforeTest;
-	TG_After afterTest;
-	TestDescriptor *tests;
-	int numTests;
+	struct{
+		TG_Before beforeGroup;
+		TG_After afterGroup;
+		TG_Before beforeTest;
+		TG_After afterTest;
+		TestDescriptor *tests;
+		int numTests;
+	}testActions;
 	struct{
 		int run;
 		int success;
 		int failure;
 		int error;
 	}outcomeCounters;
-	jmp_buf savedState;
-	int canFail;
+	struct{
+		jmp_buf savedState;
+		int canFail;
+		int currentTest;
+	}testingState;
 }TestGroup;
 
 void TG_init(TestGroup *self, const char *groupName);
 
-void TG_doBeforeGroup(TestGroup *self, TG_Before beginGroup);
-void TG_doAfterGroup(TestGroup *self, TG_After afterGroup);
-void TG_doBeforeTest(TestGroup *self,TG_Before beforeTest);
-void TG_doAfterTest(TestGroup *self,TG_After afterTest);
+void TG_setBeforeGroupAction(TestGroup *self, TG_Before beginGroup);
+void TG_setAfterGroupAction(TestGroup *self, TG_After afterGroup);
+void TG_setBeforeTestAction(TestGroup *self,TG_Before beforeTest);
+void TG_setAfterTestAction(TestGroup *self,TG_After afterTest);
 void TG_setTests(TestGroup *self, TestDescriptor *tests, int numTests);
 void TG_fail(TestGroup *self, const char *msg);
 void TG_error(TestGroup *self, const char *msg);

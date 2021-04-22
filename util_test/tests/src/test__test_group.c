@@ -28,7 +28,7 @@
  * 	+ BeforeTest (inicialización solamente)
  * 	+ AfterTest (inicialización solamente)
  * Fin 2021-04-21 00:34
- *
+ * [Scrum 1: 1h54m ]
  * Inicio 2021-04-21 09:53
  * Historia Ejecuta Tests -- 3 puntos según el último estimado
  *
@@ -49,6 +49,23 @@
  * -- Pausa -- 2021-04-21 11:13
  * -- Continúa -- 2021-04-21 15:12
  * -- Fin -- 2021-04-21 16:47
+ * [Scrum 1: 4h49m]
+ *
+ * 2021-03-21 19:33
+ * Before -- 2 puntos según último estimado
+ *
+ * Debe ejecutar la función BeforeTest antes de cada test del grupo. La función BeforeTest podrá usar TG_fail para reportar
+ * problemas de inicialización debidos a fallas de la unidad bajo prueba o TG_error para reportar fallas debidas a elementos externos
+ *
+ * Pruebas de aceptación
+ *
+ * Deberá ejecutarse la función configurada en BeforeTest antes de cada prueba. Si dicha función falla deberá reportarse la falla de la prueba correspondiente
+ *
+ * -- Pausa -- 2021-04-21 19:55
+ * -- Continúa -- 2021-04-21 22:18
+ * -- Fin -- 2021-04-21 23:36
+ * [scrum 1: 6h29m]
+ *
  */
 #define SOURCE_TEST__TEST_GROUP_C
 #include <test.h>
@@ -59,6 +76,7 @@ static struct EstadoTests_TestGroup{
 	TestGroup grupo;
 	int falla;
 	struct{
+		int inicializaciones;
 		int pruebasEjecutadas;
 		int pruebasCorrectas;
 		int pruebasFalladas;
@@ -91,18 +109,47 @@ static inline void registraEjecucionError(void)
 	registraEjecucion();
 	++estado.contadores.errores;
 }
-#define STUB(nombre) static void nombre(TestGroup *tg)\
+
+static inline void registraInicializacionError(void)
+{
+	++estado.contadores.errores;
+	++estado.contadores.pruebasEjecutadas;
+	++estado.contadores.inicializaciones;
+}
+static inline void registraInicializacionFalla(void)
+{
+	++estado.contadores.pruebasFalladas;
+	++estado.contadores.pruebasEjecutadas;
+	++estado.contadores.inicializaciones;
+}
+static inline void registraInicializacionCorrecta(void)
+{
+	++estado.contadores.inicializaciones;
+}
+static inline void registraFinalizacionCorrecta(void)
+{
+
+}
+static inline void registraInicializacionGrupoCorrecta(void)
+{
+
+}
+static inline void registraFinalizacionGrupoCorrecta(void)
+{
+
+}
+#define STUB(nombre,tipoRegistro) static void nombre(TestGroup *tg)\
 {\
 	(void) tg;\
-	registraEjecucionCorrecta();\
+	registra##tipoRegistro##Correcta();\
 }
 
-STUB(inicializadorDeGrupo)
-STUB(finalizadorDeGrupo)
-STUB(inicializadorDePrueba)
-STUB(finalizadorDePrueba)
-STUB(pruebaSiempreExitosa)
-STUB(pruebaStub)
+STUB(inicializadorDeGrupo,InicializacionGrupo)
+STUB(finalizadorDeGrupo,FinalizacionGrupo)
+STUB(inicializadorDePrueba,Inicializacion)
+STUB(finalizadorDePrueba,Finalizacion)
+STUB(pruebaSiempreExitosa,Ejecucion)
+STUB(pruebaStub,Ejecucion)
 
 
 static void pruebaFalla(TestGroup *tg)
@@ -225,6 +272,18 @@ static inline void verificaEjecucionPruebas(void)
 		reportaFalla("No se han ejecutado todas las pruebas!");
 }
 
+static inline void verificaEjecucionInicializacion(void)
+{
+	if ((const int)estado.contadores.inicializaciones != numPruebas)
+		reportaFalla("No se han ejecutado todas las inicializaciones de prueba!");
+}
+
+static inline void verificaEjecucion(void)
+{
+	verificaEjecucionInicializacion();
+	verificaEjecucionPruebas();
+}
+
 static inline void verificaResultados(void)
 {
 	const int pruebasEjecutadas = TG_countExecuted(&estado.grupo);
@@ -257,11 +316,11 @@ static inline void inicializaPruebas(void)
 	if(memoriaConservaTestigo(&estado.grupo, sizeof(estado.grupo)))
 		reportaFalla("No se ha inicializado la memoria de grupo de prueba!");
 
-	TG_doBeforeGroup(&estado.grupo, inicializadorDeGrupo);
-	TG_doAfterGroup(&estado.grupo, finalizadorDeGrupo);
+	TG_setBeforeGroupAction(&estado.grupo, inicializadorDeGrupo);
+	TG_setAfterGroupAction(&estado.grupo, finalizadorDeGrupo);
 
-	TG_doBeforeTest(&estado.grupo,inicializadorDePrueba);
-	TG_doAfterTest(&estado.grupo,finalizadorDePrueba);
+	TG_setBeforeTestAction(&estado.grupo,inicializadorDePrueba);
+	TG_setAfterTestAction(&estado.grupo,finalizadorDePrueba);
 
 	TG_setTests(&estado.grupo,pruebas,numPruebas);
 
@@ -273,6 +332,28 @@ static inline void descartaDosPruebas(void)
 	if(numPruebas>2) numPruebas-=2;
 }
 
+static inline void inicializacionConFalla(TestGroup *tg)
+{
+	registraInicializacionFalla();
+	TG_fail(tg, "Inicialización con falla");
+}
+
+static inline void inicializacionConError(TestGroup *tg)
+{
+	registraInicializacionError();
+	TG_error(tg, "Inicialización con error");
+}
+
+static inline void inyectaInicializacionConFalla(void)
+{
+	TG_setBeforeTestAction(&estado.grupo,inicializacionConFalla);
+}
+
+static inline void inyectaInicializacionConError(void)
+{
+	TG_setBeforeTestAction(&estado.grupo,inicializacionConError);
+}
+
 /**
  * API visible desde el exterior
  */
@@ -282,20 +363,30 @@ int testRun_TestGroup(void)
 	estado.falla = 0;
 
 	inicializaPruebas();
-
+	inyectaInicializacionConFalla();
 	TG_runTests(&estado.grupo);
+	verificaEjecucion();
+	verificaResultados();
 
-	verificaEjecucionPruebas();
+	inicializaPruebas();
+	inyectaInicializacionConError();
+	TG_runTests(&estado.grupo);
+	verificaEjecucion();
+	verificaResultados();
+
+
+	inicializaPruebas();
+	TG_runTests(&estado.grupo);
+	verificaEjecucion();
 	verificaResultados();
 
 	descartaDosPruebas();
 
 	inicializaPruebas();
-
 	TG_runTests(&estado.grupo);
-
-	verificaEjecucionPruebas();
+	verificaEjecucion();
 	verificaResultados();
+
 
 	return estado.falla;
 }
