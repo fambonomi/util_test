@@ -515,11 +515,15 @@
                                 								
                                 <option id="gnu.c.compiler.option.optimization.flags.792361784" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-Og" valueType="string"/>
                                 								
+                                <option id="gnu.c.compiler.option.debugging.codecov.1753364419" name="Generate gcov information (-ftest-coverage -fprofile-arcs)" superClass="gnu.c.compiler.option.debugging.codecov" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+                                								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.775480410" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
                             </tool>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug.509590234" name="MinGW C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.mingw.exe.debug">
+                                								
+                                <option id="gnu.c.link.option.debugging.codecov.1353161685" name="Generate gcov information (-ftest-coverage -fprofile-arcs)" superClass="gnu.c.link.option.debugging.codecov" value="true" valueType="boolean"/>
                                 								
                                 <inputType id="cdt.managedbuild.tool.gnu.c.linker.input.865388198" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
                                     									

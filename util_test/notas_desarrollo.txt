@@ -1,0 +1,176 @@
+------------------------------------------------
+[scrum 1: inicio]
+-- inicio 2021-04-20 20:51
+Historia Inicializa -- 4 puntos según el último estimado
+Inicializa un grupo de pruebas. La instancia de grupo de pruebas debe tener referencia a la lista de funciones de prueba pertenecientes al
+grupo. Además debe tener referencia a funciones de inicialización y finalización de grupo y de prueba.
+La lista de funciones de prueba mantendrá, además de las funciones, descripciones y estado de cada prueba.
+El estado podrá ser no ejecutada, exito, falla y error. Falla indica la falla de la prueba y error una falla externa que evitó su ejecución.
+Las pruebas se implementarán como funciones estáticas en una unidad de compilación dedicada. La misma unidad tendrá una función global para
+ejecutar la inicialización del grupo de pruebas. El grupo de pruebas no será reentrante, manteniendo su estado en variables static. El estado
+incluirá al menos un objeto grupo de pruebas y una lista de pruebas que deberá asociarse al objeto durante su inicialización.
+
+Debe poder inicializarse un grupo de pruebas incluyendo múltiples pruebas con sus respectivas descripciones. Las pruebas de este grupo serán
+una primera aproximación a la prueba de capacidades del sistema en desarrollo según el estado del conocimiento actual acerca del mismo.
+
+Las pruebas unitarias del sistema serán ejecutadas usando las facilidades en desarrollo, por ello nos apartaremos un tanto de la filosofía TDD
+en este caso puesto que las pruebas unitarias no podrán ejecutarse hasta que sea implementada la historia correspondiente.
+
+Historia Ejecuta Tests -- 3 puntos según el último estimado
+
+Partiendo de un grupo de pruebas correctamente inicializado, el sistema deberá permitir la ejecución automatizada de las pruebas del grupo.
+Registrará el resultado obtenido en cada prueba ejecutada. Al tiempo que ejecuta las pruebas informará las novedades mediante la salida
+de consola. Para ello mínimamente presentará la descripción de la prueba al iniciarla y un indicador de estado una vez ésta termine.
+El indicador deberá ser totalmente claro y expresar todos los estados finales descritos en la historia "Inicializa".
+Al finalizar las pruebas deberá presentar un resumen con el número de pruebas exitosas, falladas y con error.
+Deberá implementar un mecanismo que permita a la prueba señalar falla y mensaje de error, siendo exitosa en caso de no hacerlo.
+Inmediatamente después del fallo de una prueba deberá informar por consola la razón declarada del fallo.
+
+Pruebas de aceptación
+
+Se inicializará y ejecutará un conjunto de pruebas básico que ejercite las capacidades de inicialización y ejecución. Este grupo de pruebas
+incluirá una o más pruebas exitosas y una o más fallas. Las pruebas deberán ensayar la correcta inicialización del grupo de pruebas y
+la correcta ejecución de los casos de prueba.
+
+Historia: Before -- 2 puntos según último estimado
+
+Debe ejecutar la función BeforeTest antes de cada test del grupo. La función BeforeTest podrá usar TG_fail para reportar
+problemas de inicialización debidos a fallas de la unidad bajo prueba o TG_error para reportar fallas debidas a elementos externos
+
+Pruebas de aceptación
+
+Deberá ejecutarse la función configurada en BeforeTest antes de cada prueba. Si dicha función falla deberá reportarse la falla de la prueba correspondiente
+
+#Tiempos
+-- 2021-04-20 22:23 Pasa pruebas de aceptación Historia Inicializa
+[scrum 1: 1h32m]
+## Completa historia Inicializa
+-- Inicio 2021-04-21 00:12
+-- Fin 2021-04-21 00:34
+[Scrum 1: 1h54m ]
+## Corrección menor Inicializa
+-- Inicio 2021-04-21 09:53
+-- Pausa -- 2021-04-21 11:13
+-- Continúa -- 2021-04-21 15:12
+-- Fin -- 2021-04-21 16:47
+[Scrum 1: 4h49m]
+## Completa historia Ejecuta Tests
+--inicio 2021-03-21 19:33
+-- Pausa -- 2021-04-21 19:55
+-- Continúa -- 2021-04-21 22:18
+-- Fin -- 2021-04-21 23:36
+[scrum 1: Fin - 6h29m - 9 puntos de historia]
+## Completa historia Before
+
+#Detalles
+Tiempo de trabajo: 6h29m
+Puntos de historia: 9
+Ritmo de pogreso: 9 puntos por unidad
+------------------------------------------------
+# SCRUM 2
+Historia After -- 2 puntos según último estimado
+
+Debe ejecutar la función AfterTest después de cada test del grupo. La función AfterTest podrá usar TG_fail para reportar
+problemas de inicialización debidos a fallas de la unida bajo prueba o TG_error para reportar fallas debidas a elementos externos
+
+Pruebas de aceptación
+
+Deberá ejecutarse la función configurada en AfterTest luego de cada prueba. Si dicha función falla deberá reportarse la falla de la prueba correspondiente.
+
+Historia AssertTrue -- 1 punto
+
+Función AssertTrue que debe llamarse dentro de una prueba, con el contexto del grupo de pruebas, una texto descriptivo y la posición (__FILE__,__FUNCTION__,__LINE__).
+Un macro permite un uso más sencillo pasando automáticamente la posición, requiriendo solo los primeros tres parámetros. Si el valor lógico es verdadero no hace nada
+y si es falso llama a TG_fail con un mensaje descriptivo indicando que se probó, que se esperaba, que se obtuvo y la posición del error.
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si su argumento de prueba es falso, y no afectar la prueba si su argumento es verdadero.
+La falla se comprobará examinando el resultado de la prueba.
+
+Historia AssertFalse -- 1 punto
+
+Función AssertFalse que debe llamarse dentro de una prueba, con el contexto del grupo de pruebas, una texto descriptivo y la posición (__FILE__,__FUNCTION__,__LINE__).
+Un macro permite un uso más sencillo pasando automáticamente la posición, requiriendo solo los primeros tres parámetros. Si el valor lógico es falso no hace nada
+y si es verdadero llama a TG_fail con un mensaje descriptivo indicando que se probó, que se esperaba, que se obtuvo y la posición del error.
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si su argumento de prueba es verdadero, y no afectar la prueba si su argumento es falso.
+La falla se comprobará examinando el resultado de la prueba.
+
+Historia AssertIntEqual -- 1 punto
+
+Función AssertIntEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, entero A, entero B, parámetros de posición
+Comportamiento: falla si A != B, no hace nada si A==B
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si sus argumentos de prueba son distintos y no afectar la prueba si son idénticos.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia AssertIntNotEqual -- 1 punto
+
+Función AssertIntNotEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, entero A, entero B, parámetros de posición
+Comportamiento: falla si A == B, no hace nada si A != B
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si sus argumentos de prueba son idénticos y no afectar la prueba si son distintos.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia AssertMemoryEqual -- 2 puntos
+
+Función AssertMemoryEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, puntero A, puntero B, longitud a comparar en bytes, parámetros de posición
+Comportamiento: Compara bloques de memoria apuntados por A y B. Si los contenidos son diferentes genera un error.
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si los bloques de memoria son distintos y no afectar la ejecución si son idénticos.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia AssertMemoryNotEqual -- 2 puntos
+
+Función AssertMemoryNotEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, puntero A, puntero B, longitud a comparar en bytes, parámetros de posición.
+Comportamiento: Compara bloques de memoria apuntados por A y B. Si los contenidos son idénticos genera un error.
+Nota: se define macro que completa la posición automáticamente
+
+#Tiempos
+
+[scrum 2: inicio]
+-- inicio planificación 2021-04-22 11:45 --
+-- fin planificación 2021-04-22 11:48 --
+[scrum 2: 0h3m]
+## Planificación de scrum completa y criterios de aceptación definidos
+Puntos planificados: 9
+-- inicio 2021-04-22 17:17 --
+-- pausa 2021-04-22 18:33 --
+-- inicio 2021-04-22 18:52 --
+Añadida historia: plugin salida -- 3 puntos
+
+Añadir un sistema de plugins que permita modificar el modo de salida del conjunto de pruebas
+Plugin TGReport
+funciones begin, test, fail, error, end
+void begin(TGReport *self,char *groupName);
+void test(TGReport *self,char *testName);
+void fail(TGReport *self,char *msg);
+void error(TGReport *self,char *msg);
+void end(TGReport *self,int run,int pass,int fail,int error);
+
+Condiciones de aceptación:
+
+La implementación por defecto del plugin debe mantener la estética actual y será usada si no se
+especifica otra implementación mediante TG_reportPlugin(TestGroup *self,TGReport *plugin);
+
+-- fin historia Plugin salida 2021-04-22 21:55
+Nota: Se realizó una extensa revisión y mejora general del código
+[scrum 2:4h22m]
+-- continúa 2021-04-22 21:58 --
+

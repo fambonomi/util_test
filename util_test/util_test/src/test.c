@@ -11,23 +11,39 @@
 #include <string.h> /*memset*/
 #include <stdio.h> /*printf*/
 #include <stddef.h> /*NULL*/
-
+#include <tgreporter_stdout.h>
 /**
  * Static function section
  */
 
+static inline void TG__setDefaultReporter(TestGroup *self)
+{
+	self->reportPlugin = TGReporter_stdout_getInstance();
+}
+static inline TGReporter * TG__getReporter(TestGroup *self)
+{
+	const int haveValidReportPlugin = NULL != self->reportPlugin;
+
+	if (!haveValidReportPlugin)
+		TG__setDefaultReporter(self);
+
+	return self->reportPlugin;
+}
+
 static inline void TG__recordFailure(TestGroup *self, const char *msg)
 {
-	printf(" [FAIL]\n");
-	printf("    Failure: %s\n",msg);
 	++self->outcomeCounters.failure;
+
+	TGReporter * const reporter = TG__getReporter(self);
+	TGR_reportFail(reporter, msg);
 }
 
 static inline void TG__recordError(TestGroup *self, const char *msg)
 {
-	printf(" [ERROR]\n");
-	printf("    Error: %s\n",msg);
 	++self->outcomeCounters.error;
+
+	TGReporter *const reporter =TG__getReporter(self);
+	TGR_reportError(reporter, msg);
 }
 
 static inline void TG__recoverFromFailureOrError(TestGroup *self)
@@ -37,8 +53,10 @@ static inline void TG__recoverFromFailureOrError(TestGroup *self)
 
 static inline void TG__recordSuccess(TestGroup *self)
 {
-	printf(" [OK]\n");
-	++self->outcomeCounters.success;
+	++self->outcomeCounters.passed;
+
+	TGReporter *const reporter = TG__getReporter(self);
+	TGR_reportPass(reporter);
 }
 
 static inline void TG__doBeforeTest(TestGroup *self)
@@ -62,13 +80,23 @@ static inline TestDescriptor *TG__getCurrentTestDescriptor(TestGroup *self)
 }
 static inline TG_Test TG__getCurrentTestAction(TestGroup *self)
 {
-	const TestDescriptor *descriptor = TG__getCurrentTestDescriptor(self);
-	const int descriptorIsValid = NULL == descriptor ;
+	TestDescriptor *const descriptor = TG__getCurrentTestDescriptor(self);
+	const int descriptorIsValid = NULL != descriptor;
 
 	if (descriptorIsValid)
 		return descriptor->testFunction;
 	else
 		return (TG_Test)0;
+}
+static inline const char *TG__describeCurrentTest(TestGroup *self)
+{
+	TestDescriptor *const descriptor = TG__getCurrentTestDescriptor(self);
+	const int descriptorIsValid = NULL != descriptor;
+
+	if (descriptorIsValid)
+		return descriptor->description;
+	else
+		return NULL;
 }
 static inline void TG__doTest(TestGroup *self)
 {
@@ -81,47 +109,50 @@ static inline void TG__doTest(TestGroup *self)
 		TG_error(self, "Missing testing function");
 }
 
-static inline void TG__callAndRecordTest(TestGroup *self, TG_Test test)
+static inline void TG__callAndRecordTest(TestGroup *self)
 {
 	++self->outcomeCounters.run;
 	TG__doBeforeTest(self);
-	test(self);
+	TG__doTest(self);
 	TG__recordSuccess(self); /* in case of error this will not get executed */
 }
 
 
-static inline void TG__runTestAndManageErrors(TestGroup *self, TG_Test test)
+static inline void TG__runTestAndManageErrors(TestGroup *self)
 {
 	int backFromAFailure = setjmp(self->testingState.savedState) != 0;
 
 	self->testingState.canFail = !backFromAFailure;
 
 	if(!backFromAFailure)
-		TG__callAndRecordTest(self,test);
+		TG__callAndRecordTest(self);
 
 	self->testingState.canFail = 0;
 
 }
 
-
+static inline void TG__announceTest(TestGroup *self)
+{
+	const char *const description = TG__describeCurrentTest(self);
+	TGReporter *reporter = TG__getReporter(self);
+	TGR_reportTest(reporter, description);
+}
 static inline void TG__announceAndRunTest(TestGroup *self)
 {
-	const TestDescriptor *descriptor= TG__getCurrentTestDescriptor(self);
+	TestDescriptor *const descriptor= TG__getCurrentTestDescriptor(self);
 	const int isValidDescriptor = NULL != descriptor;
 	if (isValidDescriptor)
 	{
-		printf(descriptor->description);
-		TG__runTestAndManageErrors(self, descriptor->testFunction);
+		TG__announceTest(self);
+		TG__runTestAndManageErrors(self);
 	}
 }
 
 static inline void TG__showOutcome(TestGroup *self)
 {
-	printf("\nOutcome:\nTests run: %d, success: %d, failures: %d, errors: %d\n---End---\n\n",
-			TG_countExecuted(self),
-			TG_countSuccessful(self),
-			TG_countFailed(self),
-			TG_countErrors(self));
+	TGReporter *const reporter = TG__getReporter(self);
+
+	TGR_reportSummary(reporter, &self->outcomeCounters);
 }
 
 static inline void TG__resetOutcomeCounts(TestGroup *self)
@@ -131,8 +162,8 @@ static inline void TG__resetOutcomeCounts(TestGroup *self)
 
 static inline void TG__showTitle(TestGroup *self)
 {
-	printf("---Begining---\nTest group: %s\nNumber of tests: %d\n\n",
-			self->groupName,self->testActions.numTests);
+	TGReporter *reporter = TG__getReporter(self);
+	TGR_reportBegin(reporter, self->groupName, self->testActions.numTests);
 }
 
 static inline void TG__selectFirstTest(TestGroup *self)
@@ -168,6 +199,11 @@ void TG_init(TestGroup *self,const char *groupName)
 {
 	memset(self,0,sizeof(*self));
 	self->groupName = groupName;
+}
+
+void TG_setReportPlugin(TestGroup *self,TGReporter *plugin)
+{
+	self->reportPlugin=plugin;
 }
 
 void TG_setTests(TestGroup *self, TestDescriptor *tests,int numTests)
@@ -212,9 +248,9 @@ void TG_runTests(TestGroup *self)
 }
 
 
-int TG_countSuccessful(TestGroup *self)
+int TG_countPassed(TestGroup *self)
 {
-	return self->outcomeCounters.success;
+	return self->outcomeCounters.passed;
 }
 
 int TG_countFailed(TestGroup *self)

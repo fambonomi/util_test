@@ -12,6 +12,11 @@
 /* Declara que existe una struct TestGroup definida luego */
 struct TestGroup;
 
+/**
+ * struct plugin de salida
+ */
+struct TGReporter;
+
 /* Punteros a función par prueba, incialización y finalización*/
 
 typedef void (*TG_Test)(struct TestGroup*);
@@ -26,9 +31,17 @@ typedef struct TestDescriptor{
 	TG_Test testFunction;
 }TestDescriptor;
 
+typedef struct TestGroupOutcome{
+	int run;
+	int passed;
+	int failure;
+	int error;
+}TestGroupOutcome;
+
 typedef struct TestGroup
 {
 	const char * groupName;
+	struct TGReporter *reportPlugin;
 	struct{
 		TG_Before beforeGroup;
 		TG_After afterGroup;
@@ -37,12 +50,7 @@ typedef struct TestGroup
 		TestDescriptor *tests;
 		int numTests;
 	}testActions;
-	struct{
-		int run;
-		int success;
-		int failure;
-		int error;
-	}outcomeCounters;
+    TestGroupOutcome outcomeCounters;
 	struct{
 		jmp_buf savedState;
 		int canFail;
@@ -52,6 +60,7 @@ typedef struct TestGroup
 
 void TG_init(TestGroup *self, const char *groupName);
 
+void TG_setReportPlugin(TestGroup *self, struct TGReporter *plugin);
 void TG_setBeforeGroupAction(TestGroup *self, TG_Before beginGroup);
 void TG_setAfterGroupAction(TestGroup *self, TG_After afterGroup);
 void TG_setBeforeTestAction(TestGroup *self,TG_Before beforeTest);
@@ -61,7 +70,7 @@ void TG_fail(TestGroup *self, const char *msg);
 void TG_error(TestGroup *self, const char *msg);
 void TG_runTests(TestGroup *self);
 int TG_countExecuted(TestGroup *self);
-int TG_countSuccessful(TestGroup *self);
+int TG_countPassed(TestGroup *self);
 int TG_countFailed(TestGroup *self);
 int TG_countErrors(TestGroup *self);
 
