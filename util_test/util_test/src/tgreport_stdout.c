@@ -59,7 +59,7 @@ static inline void printSummary(const TestGroupOutcome *summary)
 	printf("\nOutcome:\nTests run: %d, passed: %d, failures: %d, errors: %d\n---End---\n\n",
 			summary->run,
 			summary->passed,
-			summary->failure,
+			summary->failed,
 			summary->error);
 
 }

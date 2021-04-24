@@ -9,7 +9,6 @@
 #include <test.h>
 #include <setjmp.h> /*setjmp, longjmp*/
 #include <string.h> /*memset*/
-#include <stdio.h> /*printf*/
 #include <stddef.h> /*NULL*/
 #include <tgreporter_stdout.h>
 /**
@@ -20,6 +19,7 @@ static inline void TG__setDefaultReporter(TestGroup *self)
 {
 	self->reportPlugin = TGReporter_stdout_getInstance();
 }
+
 static inline TGReporter * TG__getReporter(TestGroup *self)
 {
 	const int haveValidReportPlugin = NULL != self->reportPlugin;
@@ -30,18 +30,35 @@ static inline TGReporter * TG__getReporter(TestGroup *self)
 	return self->reportPlugin;
 }
 
-static inline void TG__recordFailure(TestGroup *self, const char *msg)
+static inline const char* stringOrDefault(const char *message,const char *defaultValue)
 {
-	++self->outcomeCounters.failure;
+	const int isMessageNull = NULL == message;
+	const int isDefaultNull = NULL == defaultValue;
 
+	if (isMessageNull)
+	{
+		if(isDefaultNull)
+			return "<NULL>";
+		else
+			return defaultValue;
+	}
+	return message;
+}
+
+static inline void TG__flagFailure(TestGroup *self, const char *msg)
+{
+	self->testingState.hasFailed=1;
+
+	msg = stringOrDefault(msg, "Failure with no reason given.");
 	TGReporter * const reporter = TG__getReporter(self);
 	TGR_reportFail(reporter, msg);
 }
 
-static inline void TG__recordError(TestGroup *self, const char *msg)
+static inline void TG__flagError(TestGroup *self, const char *msg)
 {
-	++self->outcomeCounters.error;
+	self->testingState.hadError=1;
 
+	msg = stringOrDefault(msg, "An error happened but there is no specific error message.");
 	TGReporter *const reporter =TG__getReporter(self);
 	TGR_reportError(reporter, msg);
 }
@@ -51,14 +68,38 @@ static inline void TG__recoverFromFailureOrError(TestGroup *self)
 	longjmp(self->testingState.savedState,1);
 }
 
-static inline void TG__recordSuccess(TestGroup *self)
+static inline void TG__recordErrorOutcome(TestGroup *self)
+{
+	++self->outcomeCounters.error;
+
+}
+static inline void TG__recordFailureOutcome(TestGroup *self)
+{
+	++self->outcomeCounters.failed;
+}
+static inline void TG__recordAndFlagPassedOutcome(TestGroup *self)
 {
 	++self->outcomeCounters.passed;
-
 	TGReporter *const reporter = TG__getReporter(self);
 	TGR_reportPass(reporter);
 }
+static inline void TG__recordOutcome(TestGroup *self)
+{
+	const int hadError = self->testingState.hadError;
+	const int hasFailed = !hadError && self->testingState.hasFailed;
 
+	if (hadError)
+		TG__recordErrorOutcome(self);
+	else if (hasFailed)
+		TG__recordFailureOutcome(self);
+	else
+		TG__recordAndFlagPassedOutcome(self);
+}
+static inline void TG__initTestOutcome(TestGroup *self)
+{
+	self->testingState.hadError=0;
+	self->testingState.hasFailed=0;
+}
 static inline void TG__doBeforeTest(TestGroup *self)
 {
 	const TG_Before beforeFn = self->testActions.beforeTest;
@@ -66,6 +107,15 @@ static inline void TG__doBeforeTest(TestGroup *self)
 
 	if(beforeFnIsValid)
 		beforeFn(self);
+}
+
+static inline void TG__doAfterTest(TestGroup *self)
+{
+	const TG_After afterFn = self->testActions.afterTest;
+	const int afterFnIsValid = (TG_After) 0 != afterFn;
+
+	if(afterFnIsValid)
+		afterFn(self);
 }
 
 static inline TestDescriptor *TG__getCurrentTestDescriptor(TestGroup *self)
@@ -94,9 +144,9 @@ static inline const char *TG__describeCurrentTest(TestGroup *self)
 	const int descriptorIsValid = NULL != descriptor;
 
 	if (descriptorIsValid)
-		return descriptor->description;
+		return stringOrDefault(descriptor->description, "Test without description.");
 	else
-		return NULL;
+		return "Invalid test descriptor!";
 }
 static inline void TG__doTest(TestGroup *self)
 {
@@ -114,21 +164,31 @@ static inline void TG__callAndRecordTest(TestGroup *self)
 	++self->outcomeCounters.run;
 	TG__doBeforeTest(self);
 	TG__doTest(self);
-	TG__recordSuccess(self); /* in case of error this will not get executed */
 }
 
 
-static inline void TG__runTestAndManageErrors(TestGroup *self)
+static inline void TG__runActionThatCanFail(TestGroup *self,void (*action)(TestGroup *self))
 {
 	int backFromAFailure = setjmp(self->testingState.savedState) != 0;
 
 	self->testingState.canFail = !backFromAFailure;
 
 	if(!backFromAFailure)
-		TG__callAndRecordTest(self);
+		action(self);
 
 	self->testingState.canFail = 0;
 
+}
+
+static inline void TG__runTestAndManageErrors(TestGroup *self)
+{
+	TG__initTestOutcome(self);
+	/* doBeforeTest is executed in the same error frame than test to prevent test from running on a failed initialization*/
+	TG__runActionThatCanFail(self, TG__callAndRecordTest);
+	/* doAfterTest is executed here so that de-initialization can proceed even if the test has failed */
+	TG__runActionThatCanFail(self, TG__doAfterTest);
+
+	TG__recordOutcome(self); /* in case of error this will not get executed */
 }
 
 static inline void TG__announceTest(TestGroup *self)
@@ -157,13 +217,20 @@ static inline void TG__showOutcome(TestGroup *self)
 
 static inline void TG__resetOutcomeCounts(TestGroup *self)
 {
-	memset(&self->outcomeCounters,0,sizeof(self->outcomeCounters));
+	self->outcomeCounters.run=0;
+	self->outcomeCounters.passed=0;
+	self->outcomeCounters.failed=0;
+	self->outcomeCounters.error=0;
 }
 
 static inline void TG__showTitle(TestGroup *self)
 {
 	TGReporter *reporter = TG__getReporter(self);
-	TGR_reportBegin(reporter, self->groupName, self->testActions.numTests);
+	const char *const groupName =
+			stringOrDefault(self->groupName, "Unnamed test group.");
+	const int numberOfTests = self->testActions.numTests;
+
+	TGR_reportBegin(reporter, groupName, numberOfTests);
 }
 
 static inline void TG__selectFirstTest(TestGroup *self)
@@ -255,7 +322,7 @@ int TG_countPassed(TestGroup *self)
 
 int TG_countFailed(TestGroup *self)
 {
-	return self->outcomeCounters.failure;
+	return self->outcomeCounters.failed;
 }
 
 int TG_countErrors(TestGroup *self)
@@ -268,7 +335,7 @@ void TG_fail(TestGroup *self, const char *msg)
 {
 	if(self->testingState.canFail)
 	{
-		TG__recordFailure(self,msg);
+		TG__flagFailure(self,msg);
 		TG__recoverFromFailureOrError(self);
 	}
 }
@@ -277,7 +344,18 @@ void TG_error(TestGroup *self, const char *msg)
 {
 	if(self->testingState.canFail)
 	{
-		TG__recordError(self,msg);
+		TG__flagError(self,msg);
 		TG__recoverFromFailureOrError(self);
 	}
+}
+const TestGroupOutcome *TG_getTestOutcome(TestGroup *self)
+{
+	return &self->outcomeCounters;
+}
+int TG_allTestsPassed(TestGroup *self)
+{
+	const int numberOfTests = self->testActions.numTests;
+	const int testsPassed = self->outcomeCounters.passed;
+
+	return testsPassed == numberOfTests;
 }

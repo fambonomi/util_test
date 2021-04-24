@@ -6,12 +6,15 @@
  */
 
 int testRun_TestGroup_base(void);
-int testRun_TestGroup_aditional(void);
-
+int testRun_TestGroup_beforeAndAfter(void);
+int testRun_TestGroup_nullStrings(void);
+int testRun_assertions(void);
 int main(void)
 {
-	const int base = testRun_TestGroup_base();
-	const int aditional = testRun_TestGroup_aditional();
-	const int someTestFailed = !!(base || aditional);
-	return someTestFailed;
+	int someTestFailed = testRun_TestGroup_base();
+	someTestFailed |= testRun_TestGroup_beforeAndAfter();
+	someTestFailed |= testRun_TestGroup_nullStrings();
+	someTestFailed |= testRun_assertions();
+
+	return !!someTestFailed;
 }

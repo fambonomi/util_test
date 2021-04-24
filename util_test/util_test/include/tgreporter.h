@@ -11,20 +11,25 @@
 
 struct TGReporter;
 
-typedef struct TGReporter{
-	void (*begin)(struct TGReporter *self,const char *groupName,int numTests);
-	void (*test)(struct TGReporter *self,const char *testName);
-	void (*pass)(struct TGReporter *self);
-	void (*fail)(struct TGReporter *self,const char *message);
-	void (*error)(struct TGReporter *self,const char *message);
-	void (*summary)(struct TGReporter *self,const TestGroupOutcome *summary);
-}TGReporter;
+typedef void (*TGReportBegin)(struct TGReporter *self,const char *groupName,int numTests);
+typedef void (*TGReportTest)(struct TGReporter *self,const char *testName);
+typedef void (*TGReportPass)(struct TGReporter *self);
+typedef void (*TGReportFail)(struct TGReporter *self,const char *message);
+typedef void (*TGReportError)(struct TGReporter *self,const char *message);
+typedef void (*TGReportSummary)(struct TGReporter *self,const TestGroupOutcome *summary);
 
-#define TGREPORTER_ISNULL_FNPTR(ptr)  ((void (*)(void))(ptr) == (void (*)(void)) 0)
+typedef struct TGReporter{
+	TGReportBegin begin;
+	TGReportTest test;
+	TGReportPass pass;
+	TGReportFail fail;
+	TGReportError error;
+	TGReportSummary summary;
+}TGReporter;
 
 static inline void TGR_reportBegin(TGReporter *self,const char *groupName,int numTests)
 {
-	const int pointerIsValid = !TGREPORTER_ISNULL_FNPTR(self->begin);
+	const int pointerIsValid = (TGReportBegin)0 != (self->begin);
 
 	if (pointerIsValid)
 		self->begin(self,groupName,numTests);
@@ -32,7 +37,7 @@ static inline void TGR_reportBegin(TGReporter *self,const char *groupName,int nu
 
 static inline void TGR_reportTest(TGReporter *self,const char *testName)
 {
-	const int pointerIsValid = !TGREPORTER_ISNULL_FNPTR(self->test);
+	const int pointerIsValid = (TGReportTest)0 != self->test;
 
 	if (pointerIsValid)
 		self->test(self,testName);
@@ -40,7 +45,7 @@ static inline void TGR_reportTest(TGReporter *self,const char *testName)
 
 static inline void TGR_reportPass(TGReporter *self)
 {
-	const int pointerIsValid = !TGREPORTER_ISNULL_FNPTR(self->pass);
+	const int pointerIsValid = (TGReportPass) 0 != self->pass;
 
 	if (pointerIsValid)
 		self->pass(self);
@@ -48,7 +53,7 @@ static inline void TGR_reportPass(TGReporter *self)
 
 static inline void TGR_reportFail(TGReporter *self,const char *message)
 {
-	const int pointerIsValid = !TGREPORTER_ISNULL_FNPTR(self->fail);
+	const int pointerIsValid = (TGReportFail)0 != self->fail;
 
 	if (pointerIsValid)
 		self->fail(self,message);
@@ -56,7 +61,7 @@ static inline void TGR_reportFail(TGReporter *self,const char *message)
 
 static inline void TGR_reportError(TGReporter *self,const char *message)
 {
-	const int pointerIsValid = !TGREPORTER_ISNULL_FNPTR(self->error);
+	const int pointerIsValid = (TGReportError)0 != self->error;
 
 	if (pointerIsValid)
 		self->error(self,message);
@@ -64,7 +69,7 @@ static inline void TGR_reportError(TGReporter *self,const char *message)
 
 static inline void TGR_reportSummary(TGReporter *self, const TestGroupOutcome *summary)
 {
-	const int pointerIsValid = !TGREPORTER_ISNULL_FNPTR(self->summary);
+	const int pointerIsValid = (TGReportSummary)0 != self->summary;
 
 	if (pointerIsValid)
 		self->summary(self,summary);

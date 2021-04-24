@@ -172,5 +172,12 @@ especifica otra implementación mediante TG_reportPlugin(TestGroup *self,TGRepor
 -- fin historia Plugin salida 2021-04-22 21:55
 Nota: Se realizó una extensa revisión y mejora general del código
 [scrum 2:4h22m]
--- continúa 2021-04-22 21:58 --
+-- continúa 2021-04-23 14:32--
+fin Historia After -- 2 puntos según último estimado
+-- pausa 2021-04-23 16:00 --
+-- continúa 2021-04-23 22:11--
+fin Historia AssertTrue -- 1 punto
+fin Historia AssertFalse -- 1 punto
+-- pausa 2021-04-24 23:42 --
+
 

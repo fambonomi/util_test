@@ -77,13 +77,6 @@ static void pruebaFalla(TestGroup *tg)
 	printf("ESTO NO DEBIERA VERSE\n");
 }
 
-static void segundaFalla(TestGroup *tg)
-{
-	registraEjecucionFalla();
-	TG_fail(tg,"Esta es una prueba que debe fallar");
-	printf("ESTO NO DEBIERA VERSE\n");
-}
-
 static void pruebaConError(TestGroup *tg)
 {
 	registraEjecucionError();
@@ -92,9 +85,8 @@ static void pruebaConError(TestGroup *tg)
 }
 static TestDescriptor pruebas[]={
 		{"Prueba que siempre es exitosa",pruebaStub},
-		{"Prueba que siempre falla",pruebaFalla},
 		{"Prueba stub, siempre exitosa", pruebaStub},
-		{"Otra prueba que falla",segundaFalla},
+		{"Prueba que siempre falla",pruebaFalla},
 		{"Esta prueba encuentra algún problema",pruebaConError},
 };
 
@@ -193,10 +185,21 @@ static inline void verificaEjecucion(void)
 
 static inline void verificaResultados(void)
 {
+	const TestGroupOutcome *resumen = TG_getTestOutcome(&estado.grupo);
+
 	const int pruebasEjecutadas = TG_countExecuted(&estado.grupo);
 	const int pruebasCorrectas = TG_countPassed(&estado.grupo);
 	const int pruebasFalladas = TG_countFailed(&estado.grupo);
 	const int errores = TG_countErrors(&estado.grupo);
+
+	const int reportaTodoCorrecto = TG_allTestsPassed(&estado.grupo);
+	const int esTodoCorrecto =
+			estado.contadores.pruebasEjecutadas == estado.contadores.pruebasCorrectas;
+
+	const int resumenCorrecto = resumen->run == pruebasEjecutadas &&
+			                    resumen->passed == pruebasCorrectas &&
+								resumen->failed == pruebasFalladas &&
+								resumen->error == errores;
 
 	if(pruebasEjecutadas != estado.contadores.pruebasEjecutadas)
 		reportaFalla("No reporta el número correcto de pruebas ejecutadas.");
@@ -209,6 +212,12 @@ static inline void verificaResultados(void)
 
 	if(errores != estado.contadores.errores)
 		reportaFalla("No reporta el número correcto de errores.");
+
+	if(reportaTodoCorrecto != esTodoCorrecto)
+		reportaFalla("No reporta correctamente si todas las pruebas pasan.");
+
+	if(!resumenCorrecto)
+		reportaFalla("No coinciden los reportes individuales con el resumen.");
 }
 
 static inline void inicializaPruebas(void)
@@ -247,8 +256,8 @@ static inline void descartaDosPruebas(void)
 int testRun_TestGroup_base(void)
 {
 	estado.falla = 0;
-
-
+	printf("--INICIO--\n");
+	printf("Pruebas de la funcionalidad báse del grupo de pruebas.\n\n");
 	inicializaPruebas();
 	TG_runTests(&estado.grupo);
 	verificaEjecucion();
@@ -261,6 +270,12 @@ int testRun_TestGroup_base(void)
 	verificaEjecucion();
 	verificaResultados();
 
+	if (!estado.falla)
+		printf("\nPasaron todas las pruebas base.\n");
+	else
+		printf("\nFallaron las pruebas base.\n");
+
+	printf("--FIN--\n");
 
 	return estado.falla;
 }

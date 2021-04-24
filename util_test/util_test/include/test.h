@@ -34,7 +34,7 @@ typedef struct TestDescriptor{
 typedef struct TestGroupOutcome{
 	int run;
 	int passed;
-	int failure;
+	int failed;
 	int error;
 }TestGroupOutcome;
 
@@ -55,6 +55,8 @@ typedef struct TestGroup
 		jmp_buf savedState;
 		int canFail;
 		int currentTest;
+		int hasFailed;
+		int hadError;
 	}testingState;
 }TestGroup;
 
@@ -73,6 +75,7 @@ int TG_countExecuted(TestGroup *self);
 int TG_countPassed(TestGroup *self);
 int TG_countFailed(TestGroup *self);
 int TG_countErrors(TestGroup *self);
-
+const TestGroupOutcome *TG_getTestOutcome(TestGroup *self);
+int TG_allTestsPassed(TestGroup *self);
 
 #endif /* INCLUDE_TEST_H_ */
