@@ -8,7 +8,7 @@
 #include <test.h>
 #include <assertions.h>
 #include <tgreporter_stub.h>
-
+#include <string.h> /*memcmp*/
 
 static void mockTest_assertTrue_true(TestGroup *tg)
 {
@@ -28,14 +28,21 @@ static void mockTest_assertFalse_false(TestGroup *tg)
 }
 
 static struct {
-    long long int A;
-    long long int B;
-}integersForAssertIntTests;
+    struct {
+        long long int A;
+        long long int B;
+    }integers;
+    struct {
+        const void *A;
+        const void *B;
+        size_t length;
+    }memBlocks;
+}mockTestParams;
 
 static void mockTest_assertIntEqual(TestGroup *tg)
 {
-    const long long int A = integersForAssertIntTests.A;
-    const long long int B = integersForAssertIntTests.B;
+    const long long int A = mockTestParams.integers.A;
+    const long long int B = mockTestParams.integers.B;
 
     ASSERT_INT_EQUAL(tg,((A==B)?"This should pass":"This should fail"),
                      A,B);
@@ -43,12 +50,59 @@ static void mockTest_assertIntEqual(TestGroup *tg)
 
 static void mockTest_assertIntNotEqual(TestGroup *tg)
 {
-    const long long int A = integersForAssertIntTests.A;
-    const long long int B = integersForAssertIntTests.B;
+    const long long int A = mockTestParams.integers.A;
+    const long long int B = mockTestParams.integers.B;
 
     ASSERT_INT_NOT_EQUAL(tg,((A!=B)?"This should pass":"This should fail"),
                      A,B);
 }
+
+static void mockTest_assertMemoryEqual(TestGroup *tg)
+{
+    const void *const A = mockTestParams.memBlocks.A;
+    const void *const B = mockTestParams.memBlocks.B;
+    const size_t length = mockTestParams.memBlocks.length;
+    int expectedOutcome = 3;
+    static const char* outcomes[]={
+            "This should pass",
+            "This should fail",
+            "This should be an error",
+            "Internal error!"
+    };
+
+    if ((void*)0 == A ||
+        (void*)0 == B)
+        expectedOutcome = 2;
+    else
+        expectedOutcome = A==B || !memcmp(A,B,length);
+
+    ASSERT_MEMORY_EQUAL(tg,outcomes[expectedOutcome&3],A,B,length);
+
+}
+
+static void mockTest_assertMemoryNotEqual(TestGroup *tg)
+{
+    const void *const A = mockTestParams.memBlocks.A;
+    const void *const B = mockTestParams.memBlocks.B;
+    const size_t length = mockTestParams.memBlocks.length;
+    int expectedOutcome = 3;
+    static const char* outcomes[]={
+            "This should fail",
+            "This should pass",
+            "This should be an error",
+            "Internal error!"
+    };
+
+    if ((void*)0 == A ||
+        (void*)0 == B)
+        expectedOutcome = 2;
+    else
+        expectedOutcome = A==B || !memcmp(A,B,length);
+
+    ASSERT_MEMORY_NOT_EQUAL(tg,outcomes[expectedOutcome&3],A,B,length);
+
+}
+
 
 static inline int verifyExpecedResults(TestGroup *tg,int passed,int failed,int error)
 {
@@ -58,6 +112,7 @@ static inline int verifyExpecedResults(TestGroup *tg,int passed,int failed,int e
            outcome->failed == failed &&
            outcome->error == error;
 }
+
 
 typedef enum {PASSED,FAILED,ERROR} ExpectedResult;
 
@@ -110,8 +165,8 @@ static void test_assertFalse_false(TestGroup *tg)
 
 static void test_assertIntEqual_pass(TestGroup *tg)
 {
-    integersForAssertIntTests.A=0x0807060504030201LL;
-    integersForAssertIntTests.B=integersForAssertIntTests.A;
+    mockTestParams.integers.A=0x0807060504030201LL;
+    mockTestParams.integers.B=mockTestParams.integers.A;
     if (!testResultsAsExpected("assertIntEqual for A==B",
             mockTest_assertIntEqual, PASSED))
         TG_error(tg,"assertIntEqual must pass if A==B");
@@ -119,8 +174,8 @@ static void test_assertIntEqual_pass(TestGroup *tg)
 
 static void test_assertIntEqual_fail(TestGroup *tg)
 {
-    integersForAssertIntTests.A=0x0807060504030201LL;
-    integersForAssertIntTests.B=-integersForAssertIntTests.A;
+    mockTestParams.integers.A=0x0807060504030201LL;
+    mockTestParams.integers.B=-mockTestParams.integers.A;
     if (!testResultsAsExpected("assertIntEqual for A!=B",
             mockTest_assertIntEqual, FAILED))
         TG_error(tg,"assertIntEqual must fail if A!=B");
@@ -128,8 +183,8 @@ static void test_assertIntEqual_fail(TestGroup *tg)
 
 static void test_assertIntNotEqual_fail(TestGroup *tg)
 {
-    integersForAssertIntTests.A=0x5a5a5a5aa5a5a5a5LL;
-    integersForAssertIntTests.B=integersForAssertIntTests.A;
+    mockTestParams.integers.A=0x5a5a5a5aa5a5a5a5LL;
+    mockTestParams.integers.B=mockTestParams.integers.A;
     if (!testResultsAsExpected("assertIntNotEqual for A==B",
             mockTest_assertIntNotEqual, FAILED))
         TG_error(tg,"assertIntNotEqual must fail if A==B");
@@ -137,11 +192,85 @@ static void test_assertIntNotEqual_fail(TestGroup *tg)
 
 static void test_assertIntNotEqual_pass(TestGroup *tg)
 {
-    integersForAssertIntTests.A=0x5a5a5a5aa5a5a5a5LL;
-    integersForAssertIntTests.B=0x0f0f0f0ff0f0f0f0LL;
+    mockTestParams.integers.A=0x5a5a5a5aa5a5a5a5LL;
+    mockTestParams.integers.B=0x0f0f0f0ff0f0f0f0LL;
     if (!testResultsAsExpected("assertIntNotEqual for A!=B",
             mockTest_assertIntNotEqual, PASSED))
         TG_error(tg,"assertIntNotEqual must pass if A!=B");
+}
+
+static void test_assertMemoryEqual_pass(TestGroup *tg)
+{
+    char mem1[]="This is a sentence.";
+    char mem2[]="This is a sentence.";
+    mockTestParams.memBlocks.A=mem1;
+    mockTestParams.memBlocks.B=mem2;
+    mockTestParams.memBlocks.length=sizeof(mem1);
+
+    if(!testResultsAsExpected("assertMemoryEqual for blocks with identical contents",
+            mockTest_assertMemoryEqual, PASSED))
+        TG_error(tg, "assertMemoryEqual must pass for blocks with identical contents");
+}
+
+static void test_assertMemoryEqual_fail(TestGroup *tg)
+{
+    char mem1[]="This is a sentence. ";
+    char mem2[]="This is another one.";
+    mockTestParams.memBlocks.A=mem1;
+    mockTestParams.memBlocks.B=mem2;
+    mockTestParams.memBlocks.length=sizeof(mem1);
+
+    if(!testResultsAsExpected("assertMemoryEqual for blocks with different contents",
+            mockTest_assertMemoryEqual, FAILED))
+        TG_error(tg, "assertMemoryEqual must fail for blocks with different contents");
+}
+
+static void test_assertMemoryEqual_error(TestGroup *tg)
+{
+    mockTestParams.memBlocks.A=(const void*) 0;
+    mockTestParams.memBlocks.B=(const void*) 0;
+    mockTestParams.memBlocks.length=0;
+
+    if(!testResultsAsExpected("assertMemoryEqual with null pointer",
+            mockTest_assertMemoryEqual, ERROR))
+        TG_error(tg, "assertMemoryEqual should give an error if asked to dereference a null pointer");
+}
+
+static void test_assertMemoryNotEqual_fail(TestGroup *tg)
+{
+    char mem1[]="This is a sentence.";
+    char mem2[]="This is a sentence.";
+    mockTestParams.memBlocks.A=mem1;
+    mockTestParams.memBlocks.B=mem2;
+    mockTestParams.memBlocks.length=sizeof(mem1);
+
+    if(!testResultsAsExpected("assertMemoryNotEqual for blocks with identical contents",
+            mockTest_assertMemoryNotEqual, FAILED))
+        TG_error(tg, "assertMemoryNotEqual must fail for blocks with identical contents");
+}
+
+static void test_assertMemoryNotEqual_pass(TestGroup *tg)
+{
+    char mem1[]="This is a sentence. ";
+    char mem2[]="This is another one.";
+    mockTestParams.memBlocks.A=mem1;
+    mockTestParams.memBlocks.B=mem2;
+    mockTestParams.memBlocks.length=sizeof(mem1);
+
+    if(!testResultsAsExpected("assertMemoryNotEqual for blocks with different contents",
+            mockTest_assertMemoryNotEqual, PASSED))
+        TG_error(tg, "assertMemoryNotEqual must pass for blocks with different contents");
+}
+
+static void test_assertMemoryNotEqual_error(TestGroup *tg)
+{
+    mockTestParams.memBlocks.A=(const void*) 0;
+    mockTestParams.memBlocks.B=(const void*) 0;
+    mockTestParams.memBlocks.length=0;
+
+    if(!testResultsAsExpected("assertMemoryNotEqual with null pointer",
+            mockTest_assertMemoryNotEqual, ERROR))
+        TG_error(tg, "assertMemoryNotEqual should give an error if asked to dereference a null pointer");
 }
 
 static TestDescriptor tests[]={
@@ -152,7 +281,19 @@ static TestDescriptor tests[]={
         {"# Asserting that equal ints are equal passes\n",test_assertIntEqual_pass},
         {"# Asserting that different ints are equal fails\n",test_assertIntEqual_fail},
         {"# Asserting that equal ints are not equal fails\n",test_assertIntNotEqual_fail},
-        {"# Asserting that different ints are not equal passes\n",test_assertIntNotEqual_pass}
+        {"# Asserting that different ints are not equal passes\n",test_assertIntNotEqual_pass},
+        {"# Asserting that the contents of two memory blocks are equal when they are equal\n",
+                test_assertMemoryEqual_pass},
+        {"# Asserting that the contents of two memory blocks are equal when they are different\n",
+                test_assertMemoryEqual_fail},
+        {"# ASSERT_MEMORY_EQUAL is given null pointers\n",
+                test_assertMemoryEqual_error},
+        {"# Asserting that the contents of two memory blocks are different when they are different\n",
+                test_assertMemoryNotEqual_pass},
+        {"# Asserting that the contents of two memory blocks are different when they are equal\n",
+                test_assertMemoryNotEqual_fail},
+        {"# ASSERT_MEMORY_NOT_EQUAL is given null pointers\n",
+                test_assertMemoryNotEqual_error},
 };
 
 static int numTests = sizeof(tests)/sizeof(*tests);

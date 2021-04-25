@@ -278,3 +278,8 @@ Puntos planificados: 8 puntos
 Historia AssertIntEqual -- 1 punto
 Historia AssertIntNotEqual -- 1 punto
 -- pausa 2021-04-25 01:14
+-- inicio 2021-04-25 12:45
+Historia AssertMemoryEqual -- 2 puntos
+-- pausa 2021-04-25 13:36
+-- inicio 2021-04-25 15:10
+Historia AssertMemoryNotEqual -- 2 puntos

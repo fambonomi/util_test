@@ -19,7 +19,6 @@ struct {
 		int actionRun;
 		int testRun;
 	}counters;
-	char stringBuffer[STRING_BUFFER_SIZE];
 }state;
 
 
