@@ -66,7 +66,9 @@ Deberá ejecutarse la función configurada en BeforeTest antes de cada prueba. S
 Tiempo de trabajo: 6h29m
 Puntos de historia: 9
 Ritmo de pogreso: 9 puntos por unidad
+
 ------------------------------------------------
+
 # SCRUM 2
 Historia After -- 2 puntos según último estimado
 
@@ -142,12 +144,10 @@ Entradas: grupo de pruebas, mensaje descriptivo, puntero A, puntero B, longitud 
 Comportamiento: Compara bloques de memoria apuntados por A y B. Si los contenidos son idénticos genera un error.
 Nota: se define macro que completa la posición automáticamente
 
-#Tiempos
+Pruebas de aceptación:
 
-[scrum 2: inicio]
--- inicio planificación 2021-04-22 11:45 --
--- fin planificación 2021-04-22 11:48 --
-[scrum 2: 0h3m]
+Debe producir la falla de la prueba si el contenido de los bloques de memoria son idénticos y no hacer nada si son diferentes.
+
 ## Planificación de scrum completa y criterios de aceptación definidos
 Puntos planificados: 9
 -- inicio 2021-04-22 17:17 --
@@ -155,6 +155,7 @@ Puntos planificados: 9
 -- inicio 2021-04-22 18:52 --
 Añadida historia: plugin salida -- 3 puntos
 
+## Enmienda en plan
 Añadir un sistema de plugins que permita modificar el modo de salida del conjunto de pruebas
 Plugin TGReport
 funciones begin, test, fail, error, end
@@ -169,15 +170,111 @@ Condiciones de aceptación:
 La implementación por defecto del plugin debe mantener la estética actual y será usada si no se
 especifica otra implementación mediante TG_reportPlugin(TestGroup *self,TGReport *plugin);
 
--- fin historia Plugin salida 2021-04-22 21:55
-Nota: Se realizó una extensa revisión y mejora general del código
-[scrum 2:4h22m]
+
+#Tiempos
+
+[scrum 2: inicio]
+--inicio planificación 2021-04-22 11:45 --
+## Planificación
+-- fin planificación 2021-04-22 11:48 --
+[scrum 2: 0h3m]
+## Completa historia Plugin salida -- 3 puntos 
+-- pausa 2021-04-22 21:55
+[scrum 2: 4h22m]
 -- continúa 2021-04-23 14:32--
-fin Historia After -- 2 puntos según último estimado
+## Completa Historia After -- 2 puntos
 -- pausa 2021-04-23 16:00 --
 -- continúa 2021-04-23 22:11--
-fin Historia AssertTrue -- 1 punto
-fin Historia AssertFalse -- 1 punto
--- pausa 2021-04-24 23:42 --
+## Completa Historia AssertTrue -- 1 punto
+## Completa Historia AssertFalse -- 1 punto
+-- fin 2021-04-24 23:42 --
+[scrum 2: 7h21m]
+# Detalles
+puntos planificados: 9
+puntos realizados: 7
+estado final: verde
+tiempo total: 7h21m
 
+---------------------------------------------------------------
 
+# SCRUM 3
+
+Historia AssertIntEqual -- 1 punto
+
+Función AssertIntEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, entero A, entero B, parámetros de posición
+Comportamiento: falla si A != B, no hace nada si A==B
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si sus argumentos de prueba son distintos y no afectar la prueba si son idénticos.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia AssertIntNotEqual -- 1 punto
+
+Función AssertIntNotEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, entero A, entero B, parámetros de posición
+Comportamiento: falla si A == B, no hace nada si A != B
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si sus argumentos de prueba son idénticos y no afectar la prueba si son distintos.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia AssertMemoryEqual -- 2 puntos
+
+Función AssertMemoryEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, puntero A, puntero B, longitud a comparar en bytes, parámetros de posición
+Comportamiento: Compara bloques de memoria apuntados por A y B. Si los contenidos son diferentes genera un error.
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación
+
+Deberá dar lugar a una falla si los bloques de memoria son distintos y no afectar la ejecución si son idénticos.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia AssertMemoryNotEqual -- 2 puntos
+
+Función AssertMemoryNotEqual que debe llamarse dentro de una prueba
+Entradas: grupo de pruebas, mensaje descriptivo, puntero A, puntero B, longitud a comparar en bytes, parámetros de posición.
+Comportamiento: Compara bloques de memoria apuntados por A y B. Si los contenidos son idénticos genera un error.
+Nota: se define macro que completa la posición automáticamente
+
+Pruebas de aceptación:
+
+Debe producir una falla si los contenidos de los bloques de memoria son idénticos y no afectar la ejecución si son diferentes.
+El mensaje de error generado debe ser razonable e incluir la información necesaria.
+
+Historia BeforeGroup -- 1 punto
+
+Debe ejecutar la función BeforeGroup una única vez antes del primer test. La función BeforeGroup podrá usar TG_fail para reportar
+problemas de inicialización debidos a fallas de la unidad bajo prueba o TG_error para reportar fallas debidas a elementos externos.
+Si la función reporta falla o error no se ejecuta el grupo y reporta todo como falla/error pero con run=0.
+
+Pruebas de aceptación
+
+Deberá ejecutarse la función configurada en BeforeGroup una única vez, antes de la primera prueba. Si dicha función falla/erra deberá reportarse la falla/error de todas las pruebas y run=0.
+
+Puntos planificados: 8 puntos
+
+Historia AfterGroup -- 1 punto
+
+Debe ejecutar la función AfterGroup una única vez luego del último test. La función AfterGroup podrá usar TG_fail para reportar
+problemas de inicialización debidos a fallas de la unidad bajo prueba o TG_error para reportar fallas debidas a elementos externos.
+Si la función reporta falla o error reporta todo el grupo como falla/error, pero las pruebas se ejecutan normalmente.
+
+Pruebas de aceptación
+
+Deberá ejecutarse la función configurada en AfterGroup una única vez, luego de la última prueba. Si dicha función falla/erra deberá reportarse la falla/error de todas las pruebas (a pesar de lo que diga el log).
+Todas las pruebas deben ejecutarse.
+
+Puntos planificados: 8 puntos
+
+# Tiempos
+[scrum 3: inicio]
+-- inicio 2021-04-25 00:23
+Historia AssertIntEqual -- 1 punto
+Historia AssertIntNotEqual -- 1 punto
+-- pausa 2021-04-25 01:14
