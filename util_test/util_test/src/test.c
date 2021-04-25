@@ -100,22 +100,42 @@ static inline void TG__initTestOutcome(TestGroup *self)
 	self->testingState.hadError=0;
 	self->testingState.hasFailed=0;
 }
+static inline void TG__doBeforeAction(TestGroup *self, TG_Before action)
+{
+    const int isValid = (TG_Before) 0 != action;
+
+    if (isValid)
+        action(self);
+}
+static inline void TG__doBeforeGroup(TestGroup *self)
+{
+    const TG_Before action = self->testActions.beforeGroup;
+    TG__doBeforeAction(self, action);
+}
 static inline void TG__doBeforeTest(TestGroup *self)
 {
-	const TG_Before beforeFn = self->testActions.beforeTest;
-	const int beforeFnIsValid = (TG_Before) 0 != beforeFn;
+	const TG_Before action = self->testActions.beforeTest;
+	TG__doBeforeAction(self,action);
+}
 
-	if(beforeFnIsValid)
-		beforeFn(self);
+static inline void TG__doAfterAction(TestGroup *self, TG_After action)
+{
+    const int isValid = (TG_After) 0 != action;
+
+    if (isValid)
+        action(self);
 }
 
 static inline void TG__doAfterTest(TestGroup *self)
 {
-	const TG_After afterFn = self->testActions.afterTest;
-	const int afterFnIsValid = (TG_After) 0 != afterFn;
+	const TG_After action = self->testActions.afterTest;
+	TG__doAfterAction(self, action);
+}
 
-	if(afterFnIsValid)
-		afterFn(self);
+static inline void TG__doAfterGroup(TestGroup *self)
+{
+    const TG_After action = self->testActions.afterGroup;
+    TG__doAfterAction(self, action);
 }
 
 static inline TestDescriptor *TG__getCurrentTestDescriptor(TestGroup *self)
@@ -245,12 +265,31 @@ static inline int TG__reachedEndOfTests(TestGroup *self)
 {
 	return self->testingState.currentTest >= self->testActions.numTests;
 }
+static inline void TG__finishTestRun(TestGroup *self)
+{
+    self->testingState.currentTest=self->testActions.numTests;
+}
+static inline void TG__updateAfterBeforeGroupAction(TestGroup *self)
+{
+    const int hadError = self->testingState.hadError;
+    const int hasFailed = !hadError && self->testingState.hasFailed;
+    if (hadError)
+        TG__recordErrorOutcome(self);
+    else if (hasFailed)
+        TG__recordFailureOutcome(self);
+
+    if(hadError || hasFailed)
+        TG__finishTestRun(self);
+}
 
 static inline void TG__initTestRun(TestGroup *self)
 {
 	TG__showTitle(self);
 	TG__resetOutcomeCounts(self);
 	TG__selectFirstTest(self);
+	TG__initTestOutcome(self);
+    TG__runActionThatCanFail(self, TG__doBeforeGroup);
+    TG__updateAfterBeforeGroupAction(self);
 }
 
 static inline void TG__finalizeTestRun(TestGroup *self)
