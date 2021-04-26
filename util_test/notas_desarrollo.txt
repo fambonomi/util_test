@@ -287,7 +287,30 @@ Historia AssertMemoryNotEqual -- 2 puntos
 --inicio 2021-04-25 17:00
 Historia BeforeGroup -- 1 punto
 --pausa 2021-04-25 17:24
---inicio 2021-04-27 19:00 
+--inicio 2021-04-27 18:30 
 --interrupcion 19:35
 --continúo 20:26
 Historia AfterGroup -- 1 punto
+--fin 2021-04-25 21:30
+[scrum 3: 5h14m]
+
+[scrum 4]
+Modelo de presentación -- 4 puntos
+
+El modelo de presentación actual tiene demasiado acople. Además
+la solución para computar los mensajes de aserción incluye un arreglo estático único.
+
+Criterios de aceptación:
+Debe existir una estructura que represente el resultado de una aserción, falla o error.
+Esta estructura debe incluir una parte variante para acomodar los parámetros originales de
+la aserción y una sección para los parámetros de ubicación __func__ __FILE__ y __LINE__.
+La interfaz con el reportador debe constar en las siguientes funciones:
+reportar inicio de grupo
+reportar resultado de prueba
+	incluye nombre de la prueba y resultado PASS/FAIL/ERROR
+reportar falla, a partir de los detalles de aserción.
+reportar error, a partir de los detalles de aserción.
+El reporte directo de falla y error incluirá información de posición. Habrá una macro para
+simplificar la llamada.
+
+--inicio 2021-04-25 23:19
