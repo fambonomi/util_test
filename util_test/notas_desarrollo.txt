@@ -287,3 +287,7 @@ Historia AssertMemoryNotEqual -- 2 puntos
 --inicio 2021-04-25 17:00
 Historia BeforeGroup -- 1 punto
 --pausa 2021-04-25 17:24
+--inicio 2021-04-27 19:00 
+--interrupcion 19:35
+--continúo 20:26
+Historia AfterGroup -- 1 punto

@@ -294,6 +294,9 @@ static inline void TG__initTestRun(TestGroup *self)
 
 static inline void TG__finalizeTestRun(TestGroup *self)
 {
+    TG__initTestOutcome(self);
+    TG__runActionThatCanFail(self, TG__doAfterGroup);
+    TG__updateAfterBeforeGroupAction(self);
 	TG__showOutcome(self);
 }
 

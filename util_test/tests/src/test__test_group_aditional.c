@@ -170,256 +170,247 @@ static inline int MTR_runAndVerifyOutcome(const MockTestRunConfig *cfg, const Te
     return MTR__verifyTestOutcome(actualOutcome, expected);
 }
 
+static void setupMockTests(MockTestRunConfig *mtc)
+{
+    MTR_init(mtc);
+    initMockTests();
+    MTR_setTests(mtc,mockTests, NUM_MOCK_TESTS);
+}
+
+static inline int testRunsMatch(int expectedTestRuns)
+{
+    return state.counters.testRun == expectedTestRuns;
+}
+static inline int actionRunsMatch(int expectedActionRuns)
+{
+    return state.counters.actionRun == expectedActionRuns;
+}
+
+static inline void runAndAssert(TestGroup *tg, MockTestRunConfig *mtc, int actionRuns,int testRuns,const TestGroupOutcome *outcome)
+{
+    const int outcomeAsExpected = MTR_runAndVerifyOutcome(mtc, outcome);
+
+    if (!actionRunsMatch(actionRuns))
+        TG_fail(tg,"Action runs don't match expectations.");
+    if (!testRunsMatch(testRuns))
+        TG_fail(tg,"Test runs don't match expectations.");
+    if (!outcomeAsExpected)
+        TG_fail(tg,"Test outcomes are different than expected!");
+
+}
+
+/* BEGIN TESTS DEFFINITIONS */
+
 static void test_BeforeTestActionSucceed(TestGroup *tg)
 {
 	MockTestRunConfig mtc;
-
-	MTR_init(&mtc);
-
-	initMockTests();
+	setupMockTests(&mtc);
 
 	MTR_setBeforeTestAction(&mtc, mockActionSucceed);
-	MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-	const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=NUM_MOCK_PASS,.failed=NUM_MOCK_FAIL,.error=NUM_MOCK_ERROR};
-
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
-
-	const int ranTests = integersAreEqual(state.counters.testRun,NUM_MOCK_TESTS);
-
-	const int ranBeforeTestAction =
-			integersAreEqual(state.counters.actionRun,NUM_MOCK_TESTS);
-
-
-	if (!ranBeforeTestAction)
-		TG_fail(tg,"Failed to run action before all the tests!");
-	if (!ranTests)
-		TG_fail(tg,"Failed to run all the tests!");
-	if (!resultsAreAsExpected)
-		TG_fail(tg,"Test outcomes are different than expected!");
+	const TestGroupOutcome expectedOutcome = {
+	        .run=NUM_MOCK_TESTS,
+            .passed=NUM_MOCK_PASS,
+            .failed=NUM_MOCK_FAIL,
+            .error=NUM_MOCK_ERROR};
+	const int beforeActionRuns = NUM_MOCK_TESTS;
+	const int testRuns = NUM_MOCK_TESTS;
+	runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 
 }
 
 static void test_BeforeTestActionFail(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setBeforeTestAction(&mtc, mockActionFail);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=0,.failed=NUM_MOCK_TESTS,.error=0};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=0,
+            .failed=NUM_MOCK_TESTS,
+            .error=0};
 
-	const int didntRunTestActions = integersAreEqual(state.counters.testRun,0);
-
-	const int ranBeforeTestAction =
-			integersAreEqual(state.counters.actionRun,NUM_MOCK_TESTS);
-
-
-	if (!ranBeforeTestAction)
-		TG_fail(tg,"Failed to run action before all the tests!");
-	if (!didntRunTestActions)
-		TG_fail(tg,"Ran test actions when beforeTest action failed!");
-	if (!resultsAreAsExpected)
-		TG_fail(tg,"Test outcomes are different than expected. If init declares a fail test fails!");
-
+    const int beforeActionRuns = NUM_MOCK_TESTS;
+    const int testRuns = 0;
+    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeTestActionError(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setBeforeTestAction(&mtc, mockActionError);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=0,.failed=0,.error=NUM_MOCK_TESTS};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=0,
+            .failed=0,
+            .error=NUM_MOCK_TESTS};
 
-    const int didntRunTestActions = integersAreEqual(state.counters.testRun,0);
-
-    const int ranBeforeTestAction =
-            integersAreEqual(state.counters.actionRun,NUM_MOCK_TESTS);
-
-
-	if (!ranBeforeTestAction)
-		TG_fail(tg,"Failed to run action before each test!");
-	if (!didntRunTestActions)
-		TG_fail(tg,"Ran test actions when beforeTest action encountered error!");
-	if (!resultsAreAsExpected)
-		TG_fail(tg,"Test outcomes are different than expected!");
-
+    const int beforeActionRuns = NUM_MOCK_TESTS;
+    const int testRuns = 0;
+    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 static void test_AfterTestActionSucceed(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setAfterTestAction(&mtc, mockActionSucceed);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=NUM_MOCK_PASS,.failed=NUM_MOCK_FAIL,.error=NUM_MOCK_ERROR};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=NUM_MOCK_PASS,
+            .failed=NUM_MOCK_FAIL,
+            .error=NUM_MOCK_ERROR};
 
-	const int ranTestActions = integersAreEqual(state.counters.testRun,NUM_MOCK_TESTS);
-
-	const int ranAfterTestAction =
-			integersAreEqual(state.counters.actionRun,NUM_MOCK_TESTS);
-
-	if (!ranAfterTestAction)
-		TG_fail(tg, "Failed to run action after each test (actions should run even if the test fails/errors)!");
-	if (!ranTestActions)
-		TG_fail(tg,"Failed to run test bodies!");
-	if (!resultsAreAsExpected)
-		TG_fail(tg, "Test outcomes are different than expected!");
+    const int afterActionRuns = NUM_MOCK_TESTS;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterTestActionFail(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setAfterTestAction(&mtc, mockActionFail);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=0,.failed=NUM_MOCK_TESTS-NUM_MOCK_ERROR,.error=NUM_MOCK_ERROR};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=0,
+            .failed=NUM_MOCK_TESTS-NUM_MOCK_ERROR,
+            .error=NUM_MOCK_ERROR};
 
-    const int ranTestActions = integersAreEqual(state.counters.testRun,NUM_MOCK_TESTS);
-
-	const int ranAfterTestAction =
-			integersAreEqual(state.counters.actionRun,NUM_MOCK_TESTS);
-
-
-	if (!ranAfterTestAction)
-		TG_fail(tg, "Failed to run action after each test (actions should run even if the test fails/errors)!");
-	if (!ranTestActions)
-		TG_fail(tg,"Failed to run test bodies (as there is no init step that can fail tests should allways run)!");
-	if (!resultsAreAsExpected)
-		TG_fail(tg, "Test outcomes are different than expected. If de-init declares a fail, the outcome can be either fail or error (if the test declared an error)!");
+    const int afterActionRuns = NUM_MOCK_TESTS;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterTestActionError(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setAfterTestAction(&mtc, mockActionError);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=0,.failed=0,.error=NUM_MOCK_TESTS};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=0,
+            .failed=0,
+            .error=NUM_MOCK_TESTS};
 
-	const int ranTestActions = integersAreEqual(state.counters.testRun,NUM_MOCK_TESTS);
-
-	const int ranAfterTestAction =
-			integersAreEqual(state.counters.actionRun,NUM_MOCK_TESTS);
-
-	if (!ranAfterTestAction)
-		TG_fail(tg, "Failed to run action after each test (actions should run even if the test fails/errors)!");
-	if (!ranTestActions)
-		TG_fail(tg,"Failed to run test bodies (as there is no init step that can fail tests should allways run)!");
-	if (!resultsAreAsExpected)
-		TG_fail(tg, "Test outcomes are different than expected. If de-init declares an error the outcome can only be error!");
+    const int afterActionRuns = NUM_MOCK_TESTS;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeGroupActionSucceed(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setBeforeGroupAction(&mtc, mockActionSucceed);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=NUM_MOCK_TESTS,.passed=NUM_MOCK_PASS,.failed=NUM_MOCK_FAIL,.error=NUM_MOCK_ERROR};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=NUM_MOCK_PASS,
+            .failed=NUM_MOCK_FAIL,
+            .error=NUM_MOCK_ERROR};
 
-    const int ranTestActions = integersAreEqual(state.counters.testRun,NUM_MOCK_TESTS);
-
-    const int ranBeforeGroupAction =
-            integersAreEqual(state.counters.actionRun,1);
-
-    if (!ranBeforeGroupAction)
-        TG_fail(tg, "Failed to run action before test group!");
-    if (!ranTestActions)
-        TG_fail(tg,"Failed to run test bodies (before group action succeeds so they should run)!");
-    if (!resultsAreAsExpected)
-        TG_fail(tg, "Test outcomes are different than expected.");
+    const int beforeActionRuns = 1;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeGroupActionFail(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setBeforeGroupAction(&mtc, mockActionFail);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
-    const TestGroupOutcome expectedOutcome = {.run=0,.passed=0,.failed=1,.error=0};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
+    const TestGroupOutcome expectedOutcome = {
+            .run=0,
+            .passed=0,
+            .failed=1,
+            .error=0};
 
-    const int didntRunTestActions = integersAreEqual(state.counters.testRun,0);
-
-    const int ranBeforeGroupAction =
-            integersAreEqual(state.counters.actionRun,1);
-
-    if (!ranBeforeGroupAction)
-        TG_fail(tg, "Failed to run action before test group!");
-    if (!didntRunTestActions)
-        TG_fail(tg,"Ran tests after failing the before group action. Tests shouldn't be run in this case because the environment could be compromised.");
-    if (!resultsAreAsExpected)
-        TG_fail(tg, "Test outcomes are different than expected (should be 0 run and 1 failed).");
+    const int beforeActionRuns = 1;
+    const int testRuns = 0;
+    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeGroupActionError(TestGroup *tg)
 {
     MockTestRunConfig mtc;
-
-    MTR_init(&mtc);
-
-    initMockTests();
+    setupMockTests(&mtc);
 
     MTR_setBeforeGroupAction(&mtc, mockActionError);
-    MTR_setTests(&mtc,mockTests, NUM_MOCK_TESTS);
 
     const TestGroupOutcome expectedOutcome = {.run=0,.passed=0,.failed=0,.error=1};
-    const int resultsAreAsExpected = MTR_runAndVerifyOutcome(&mtc, &expectedOutcome);
 
-    const int didntRunTestActions = integersAreEqual(state.counters.testRun,0);
-
-    const int ranBeforeGroupAction =
-            integersAreEqual(state.counters.actionRun,1);
-
-    if (!ranBeforeGroupAction)
-        TG_fail(tg, "Failed to run action before test group!");
-    if (!didntRunTestActions)
-        TG_fail(tg,"Ran tests after an error in the before group action. Tests shouldn't be run in this case because the environment could be compromised.");
-    if (!resultsAreAsExpected)
-        TG_fail(tg, "Test outcomes are different than expected (should be 0 run and 1 error).");
+    const int beforeActionRuns = 1;
+    const int testRuns = 0;
+    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
+static void test_AfterGroupActionSuccess(TestGroup *tg)
+{
+    MockTestRunConfig mtc;
+    setupMockTests(&mtc);
+
+    MTR_setAfterGroupAction(&mtc, mockActionSucceed);
+
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=NUM_MOCK_PASS,
+            .failed=NUM_MOCK_FAIL,
+            .error=NUM_MOCK_ERROR};
+
+    const int afterActionRuns = 1;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+}
+
+static void test_AfterGroupActionFail(TestGroup *tg)
+{
+    MockTestRunConfig mtc;
+    setupMockTests(&mtc);
+
+    MTR_setAfterGroupAction(&mtc, mockActionFail);
+
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=NUM_MOCK_PASS,
+            .failed=NUM_MOCK_FAIL+1,
+            .error=NUM_MOCK_ERROR};
+
+    const int afterActionRuns = 1;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+}
+
+static void test_AfterGroupActionError(TestGroup *tg)
+{
+    MockTestRunConfig mtc;
+    setupMockTests(&mtc);
+
+    MTR_setAfterGroupAction(&mtc, mockActionError);
+
+    const TestGroupOutcome expectedOutcome = {
+            .run=NUM_MOCK_TESTS,
+            .passed=NUM_MOCK_PASS,
+            .failed=NUM_MOCK_FAIL,
+            .error=NUM_MOCK_ERROR+1};
+
+    const int afterActionRuns = 1;
+    const int testRuns = NUM_MOCK_TESTS;
+    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+}
 static TestDescriptor tests[]={
 		{"Run action that succeeds before each test",test_BeforeTestActionSucceed},
 		{"Run action that fails before each test",test_BeforeTestActionFail},
@@ -430,6 +421,9 @@ static TestDescriptor tests[]={
 		{"Run action that succeeds before the test group",test_BeforeGroupActionSucceed},
         {"Run action that fails before the test group",test_BeforeGroupActionFail},
         {"Run action that declares an error before the test group",test_BeforeGroupActionError},
+        {"Run action that succeeds after the test group",test_AfterGroupActionSuccess},
+        {"Run action that fails after the test group",test_AfterGroupActionFail},
+        {"Run action that declares an error after the test group",test_AfterGroupActionError},
 };
 static int numTests = sizeof(tests)/sizeof(*tests);
 
