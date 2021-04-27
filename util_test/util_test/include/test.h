@@ -8,7 +8,8 @@
 #ifndef INCLUDE_TEST_H_
 #define INCLUDE_TEST_H_
 #include <setjmp.h>
-
+#include <iassertion.h>
+#include <stddef.h> /*size_t*/
 /* Declara que existe una struct TestGroup definida luego */
 struct TestGroup;
 
@@ -37,6 +38,7 @@ typedef struct TestGroupOutcome{
 	int failed;
 	int error;
 }TestGroupOutcome;
+
 
 typedef struct TestGroup
 {
