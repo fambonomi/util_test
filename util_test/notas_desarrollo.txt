@@ -314,4 +314,9 @@ la aserción y una sección para los parámetros de ubicación __func__ __FILE__
 -- pausa 2021-04-26 14:51
 -- inicio 2021-04-27 00:00
 -- pausa 2021-04-27 01:17
-
+-- inicio 2021-04-27 13:24
+-- pausa 2021-04-27 14:18
+-- inicio 2021-04-27 15:10
+Finalizada Historia Interfaz resultado de aserción-- 4 puntos
+-- pausa 2021-04-27 16:31
+[scrum 4:5h15m]

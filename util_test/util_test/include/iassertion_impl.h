@@ -22,18 +22,18 @@ struct TestAssertion{
     TAKind detailKind;
     union{
         struct{
-            TAOperator assertion;
+            TAOperator operator;
             long long int A;
             long long int B;
         }num_kind;
         struct{
-            TAOperator assertion;
+            TAOperator operator;
             const void *A;
             const void *B;
             size_t length;
         }mem_kind;
         struct{
-            TAOperator assertion;
+            TAOperator operator;
             int A;
         }bool_kind;
     }detail;
@@ -46,4 +46,16 @@ void TA_setFile(TestAssertion *self,const char *file);
 void TA_setLine(TestAssertion *self,int line);
 void TA_setFunc(TestAssertion *self,const char *func);
 
+void TA_bool_setOperator(TestAssertion *self, TAOperator operator);
+void TA_bool_setA(TestAssertion *self,int A);
+void TA_num_setOperator(TestAssertion *self,TAOperator operator);
+void TA_num_setA(TestAssertion *self,long long int A);
+void TA_num_setB(TestAssertion *self,long long int B);
+void TA_mem_setOperator(TestAssertion *self,TAOperator operator);
+void TA_mem_setA(TestAssertion *self,const void *A);
+void TA_mem_setB(TestAssertion *self,const void *B);
+void TA_mem_setLength(TestAssertion *self,size_t length);
+
+void TA_setMessage(TestAssertion *self,const char *message);
+void TA_setReason(TestAssertion *self,const char *reason);
 #endif /* INCLUDE_IASSERTION_IMPL_H_ */

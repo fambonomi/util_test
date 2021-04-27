@@ -144,8 +144,200 @@ static void test_invalidPositionParameters(TestGroup *tg)
 
 }
 
+static inline void boolAssertion_testOperator(TestGroup *tg, TestAssertion *ta, TAOperator op)
+{
+    TA_bool_setOperator(ta,op);
+    ASSERT_INT_EQUAL(tg,"Operator set (A) should coincide with operator gotten (B) in boolean assert details.",
+            op,TA_bool_getOperator(ta));
+}
+static inline void boolAssertion_testOperand(TestGroup *tg, TestAssertion *ta, int A)
+{
+    TA_bool_setA(ta,A);
+    ASSERT_INT_EQUAL(tg,"Operand set (A) should coincide with operand gotten (B) in boolean assert details.",
+            A,TA_bool_getA(ta));
+
+}
+static void test_boolAssertionOperator(TestGroup *tg)
+{
+    TestAssertion assertion={0};
+    TA_init(&assertion,TAK_BOOL);
+
+    boolAssertion_testOperator(tg,&assertion,TAO_IS_FALSE);
+    boolAssertion_testOperator(tg,&assertion,TAO_IS_TRUE);
+}
+static void test_boolAssertionOperand(TestGroup *tg)
+{
+    TestAssertion assertion={0};
+    TA_init(&assertion,TAK_BOOL);
+
+    boolAssertion_testOperand(tg,&assertion,0);
+    boolAssertion_testOperand(tg,&assertion,1);
+}
+
+static inline void numAssertion_testOperator(TestGroup *tg,TestAssertion *ta, TAOperator op)
+{
+    TA_num_setOperator(ta,op);
+    ASSERT_INT_EQUAL(tg,"Operator set (A) should coincide with operator gotten (B) in numeric assert details.",
+            op,TA_num_getOperator(ta));
+}
+
+static inline void numAssertion_testOperand(TestGroup *tg, TestAssertion *ta, long long int A, long long int B)
+{
+    TA_num_setA(ta,A);
+    TA_num_setB(ta,B);
+    ASSERT_INT_EQUAL(tg,"First operand value set (A) should coincide with value gotten (B) in numeric assert details.",
+            A,TA_num_getA(ta));
+    ASSERT_INT_EQUAL(tg,"Second operand value set (A) should coincide with value gotten (B) in numeric assert details.",
+            B,TA_num_getB(ta));
+
+}
+static void test_numAssertionOperator(TestGroup *tg)
+{
+    TestAssertion assertion={0};
+    TA_init(&assertion,TAK_NUM);
+
+    numAssertion_testOperator(tg, &assertion, TAO_EQ);
+    numAssertion_testOperator(tg, &assertion, TAO_NEQ);
+}
 
 
+static void test_numAssertionOperand(TestGroup *tg)
+{
+    TestAssertion assertion={0};
+    TA_init(&assertion,TAK_NUM);
+
+    numAssertion_testOperand(tg, &assertion, 0x9669966996699669LL,0xc33cc33cc33cc33cLL);
+    numAssertion_testOperand(tg, &assertion, 0x0123456789ABCDEFLL,0xFEDCBA9876543210LL);
+}
+
+static inline void memAssertion_testOperator(TestGroup *tg, TestAssertion *ta, TAOperator op)
+{
+    TA_mem_setOperator(ta,op);
+    ASSERT_INT_EQUAL(tg,"Operator set (A) should coincide with operator gotten (B) in memory assert",
+            op,TA_mem_getOperator(ta));
+}
+static void test_memAssertionOperator(TestGroup *tg)
+{
+    TestAssertion assertion={0};
+    TA_init(&assertion,TAK_MEM);
+
+    memAssertion_testOperator(tg, &assertion, TAO_EQ);
+    memAssertion_testOperator(tg, &assertion, TAO_NEQ);
+
+}
+
+static inline void memAssertion_testOperands(TestGroup *tg, TestAssertion *ta, const void *A,const void *B,size_t length)
+{
+    TA_mem_setA(ta,A);
+    ASSERT_INT_EQUAL(tg,"First operand pointer address set (A) should coincide with addres gotten (B) in memory assert details.",
+            (intptr_t)A,(intptr_t)TA_mem_getA(ta));
+    TA_mem_setB(ta,B);
+    ASSERT_INT_EQUAL(tg,"Second operand pointer address set (A) should coincide with addres gotten (B) in memory assert details.",
+            (intptr_t)B,(intptr_t)TA_mem_getB(ta));
+    TA_mem_setLength(ta,length);
+    ASSERT_INT_EQUAL(tg,"Memory length set (A) should coincide with memory length gotten (B) in memory assert details.",
+            length,TA_mem_getLength(ta));
+
+}
+static void test_memAssertionOperands(TestGroup *tg)
+{
+    TestAssertion assertion={0};
+    TA_init(&assertion,TAK_MEM);
+    uint8_t A1=0,B1=1;
+    uint64_t A2=0,B2=1;
+
+    memAssertion_testOperands(tg, &assertion, &A1,&B1,sizeof(A1));
+    memAssertion_testOperands(tg, &assertion, &A2,&B2,sizeof(A2));
+
+}
+
+static inline void assertion_testMessage(TestGroup *tg, TestAssertion *ta,const char*message)
+{
+    TA_setMessage(ta,message);
+    ASSERT_INT_EQUAL(tg,"Message address set (A) should equal message address gotten (B) in assertion.",
+            (intptr_t)message,(intptr_t)TA_getMessage(ta));
+}
+static inline void assertion_testNullMessage(TestGroup *tg, TestAssertion *ta)
+{
+    TA_setMessage(ta, NULL);
+    ASSERT_INT_NOT_EQUAL(tg,"When attempting to set message address to NULL (A) it should be set to default instead, gotten (B) in assertion",
+            (intptr_t)NULL,(intptr_t)TA_getMessage(ta));
+}
+static void test_assertionMessage(TestGroup *tg)
+{
+    TestAssertion assertion = {0};
+    TA_init(&assertion,TAK_BOOL);
+    assertion_testMessage(tg, &assertion, "msg1");
+    assertion_testMessage(tg, &assertion,"msg2");
+}
+static void test_assertionNullMessage(TestGroup *tg)
+{
+    TestAssertion assertion = {0};
+    TA_init(&assertion,TAK_BOOL);
+    assertion_testNullMessage(tg, &assertion);
+}
+
+static inline void assertion_testReason(TestGroup *tg,TestAssertion *ta,const char * reason)
+{
+    TA_setReason(ta,reason);
+    ASSERT_INT_EQUAL(tg,"Address of reason set (A) should coincide with address gotten (B) in assertion.",
+            (intptr_t)reason,(intptr_t)TA_getReason(ta));
+}
+
+static void test_assertionReason(TestGroup *tg)
+{
+    TestAssertion assertion = {0};
+    TA_init(&assertion,TAK_BOOL);
+    assertion_testReason(tg,&assertion,"reason 1");
+    assertion_testReason(tg,&assertion,"reason 2");
+}
+static inline void assertion_testNullReason(TestGroup *tg,TestAssertion *ta)
+{
+    TA_setReason(ta,NULL);
+    ASSERT_INT_NOT_EQUAL(tg,"Attempted set address of reason (A) should result in reason being reset instead, gotten (B) in assertion.",
+            (intptr_t)NULL,(intptr_t)TA_getReason(ta));
+
+}
+static void test_assertionNullReason(TestGroup *tg)
+{
+    TestAssertion assertion = {0};
+    TA_init(&assertion,TAK_BOOL);
+    assertion_testNullReason(tg, &assertion);
+}
+static void test_assertionSetKind(TestGroup *tg)
+{
+    TestAssertion assertion ={0};
+    TA_init(&assertion,TAK_BOOL);
+
+    TA_setKind(&assertion, TAK_MEM);
+
+    ASSERT_INT_EQUAL(tg,"After setting a new assertion king (A) it should be the new kind, gotten (B).",
+            TAK_MEM,TA_getKind(&assertion));
+}
+
+static void test_assertionInvalidKind(TestGroup *tg)
+{
+    const char *const msg="Attempting to set assertion kind to value out of range (A) should result in its reset instead, gotten (B)";
+    TestAssertion assertion = {0};
+    const int invalidKind = TAK_MAX+1;
+    TA_init(&assertion,invalidKind);
+
+    ASSERT_INT_NOT_EQUAL(tg,msg,invalidKind,TA_getKind(&assertion));
+
+    TA_setKind(&assertion, invalidKind);
+
+    ASSERT_INT_NOT_EQUAL(tg,msg,invalidKind,TA_getKind(&assertion));
+
+}
+static void test_assertionDirectKind(TestGroup *tg)
+{
+    const char *const msg="After setting assertion kind to TAK_DIRECT (A) the assertion kind should be that value, gotten (B)";
+    TestAssertion assertion = {0};
+    TA_init(&assertion,TAK_DIRECT);
+
+    ASSERT_INT_EQUAL(tg,msg,TAK_DIRECT,TA_getKind(&assertion));
+
+}
 static TestDescriptor tests[]=
 {
         {"Bool assertion struct state after initialization",test_empty_bool_assertion},
@@ -155,7 +347,21 @@ static TestDescriptor tests[]=
         {"TA_getResult doesn't return the INVALID result given to TA_setResult",test_assertionInvalidResult},
         {"Correct position parameters are returned as they were set",test_positionParameters},
         {"Invalid position parameters are not set, default values are set instead",test_invalidPositionParameters},
-
+        {"Boolean assertion operator data",test_boolAssertionOperator},
+        {"Boolean assertion operand data",test_boolAssertionOperand},
+        {"Numerical assertion operator data",test_numAssertionOperator},
+        {"Numerical assertion operand data",test_numAssertionOperand},
+        {"Memory assertion operator data",test_memAssertionOperator},
+        {"Memory assertion operand data",test_memAssertionOperands},
+        {"Assertion message is correctly set",test_assertionMessage},
+        {"Assertion message address cannot be set to NULL",test_assertionNullMessage},
+        {"Assertion reason is correctly set",test_assertionReason},
+        {"Assertion reason address cannot be set to NULL",test_assertionNullReason},
+        {"It should be possible to set a new assertion kind with setKind",test_assertionSetKind},
+        {"Attempting to set assertion kind to a value out of range should instead set it to a default value",
+        test_assertionInvalidKind},
+        {"Direct assertion kind (for assertion results without details) should be a valid kind",
+                test_assertionDirectKind},
 };
 static const int numTests = sizeof(tests)/sizeof(*tests);
 /**

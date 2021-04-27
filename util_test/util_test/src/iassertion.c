@@ -96,7 +96,59 @@ void TA_setFunc(TestAssertion *self,const char *func)
     else
         TA__unsetFunc(self);
 }
+void TA_bool_setOperator(TestAssertion *self, TAOperator operator)
+{
+    self->detail.bool_kind.operator = operator;
+}
+void TA_bool_setA(TestAssertion *self,int A)
+{
+    self->detail.bool_kind.A=!!A;
+}
 
+void TA_num_setOperator(TestAssertion *self,TAOperator operator)
+{
+    self->detail.num_kind.operator = operator;
+}
+void TA_num_setA(TestAssertion *self,long long int A)
+{
+    self->detail.num_kind.A=A;
+}
+void TA_num_setB(TestAssertion *self,long long int B)
+{
+    self->detail.num_kind.B=B;
+}
+void TA_mem_setOperator(TestAssertion *self,TAOperator operator)
+{
+    self->detail.mem_kind.operator = operator;
+}
+void TA_mem_setA(TestAssertion *self,const void *A)
+{
+    self->detail.mem_kind.A=A;
+}
+void TA_mem_setB(TestAssertion *self,const void *B)
+{
+    self->detail.mem_kind.B=B;
+}
+void TA_mem_setLength(TestAssertion *self,size_t length)
+{
+    self->detail.mem_kind.length = length;
+}
+void TA_setMessage(TestAssertion *self,const char *message)
+{
+    const int nullMessage = NULL == message;
+    if (nullMessage)
+        TA__unsetMessage(self);
+    else
+        self->message=message;
+}
+void TA_setReason(TestAssertion *self,const char *reason)
+{
+    const int nullReason = NULL == reason;
+    if (nullReason)
+        TA__unsetReason(self);
+    else
+        self->reason = reason;
+}
 /**
  * user public code
  */
@@ -141,4 +193,38 @@ size_t TA_mem_getLength(const TestAssertion *self)
 int TA_getLine(const TestAssertion *self)
 {
     return self->position.line;
+}
+
+TAOperator TA_bool_getOperator(const TestAssertion *self)
+{
+    return self->detail.bool_kind.operator;
+}
+int TA_bool_getA(const TestAssertion *self)
+{
+    return self->detail.bool_kind.A;
+}
+TAOperator TA_num_getOperator(const TestAssertion *self)
+{
+    return self->detail.num_kind.operator;
+}
+long long int TA_num_getA(const TestAssertion *self)
+{
+    return self->detail.num_kind.A;
+}
+long long int TA_num_getB(const TestAssertion *self)
+{
+    return self->detail.num_kind.B;
+}
+
+TAOperator TA_mem_getOperator(const TestAssertion *self)
+{
+    return self->detail.mem_kind.operator;
+}
+const void *TA_mem_getA(const TestAssertion *self)
+{
+    return self->detail.mem_kind.A;
+}
+const void *TA_mem_getB(const TestAssertion *self)
+{
+    return self->detail.mem_kind.B;
 }
