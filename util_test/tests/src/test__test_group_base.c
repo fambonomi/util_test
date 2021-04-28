@@ -9,6 +9,7 @@
 #include <string.h> /* memset */
 #include <stdio.h> /* printf */
 #include <assertions.h> /* TG_fail TG_error */
+#include <test_run.h>
 
 static struct EstadoTests_TestGroup{
 	TestGroup grupo;
@@ -138,7 +139,7 @@ static inline int existePunteroDatoEnMemoria(const void *memoria,size_t bytesMem
 	return existePatronEnMemoria(memoria, bytesMemoria, &patron, sizeof(patron));
 }
 
-inline static void reportaFalla(char *mensaje)
+inline static void reportaFalla(const char *mensaje)
 {
 	printf("[FALLA] %s\n",mensaje);
 	estado.falla = 1;

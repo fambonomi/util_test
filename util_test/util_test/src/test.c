@@ -16,13 +16,19 @@
 /**
  * Static function section
  */
+// to be able to turn off inline - useful when looking for dead code
+#ifdef NO_INLINE
+#define INLINE
+#else
+#define INLINE inline
+#endif
 
-static inline void TG__setDefaultReporter(TestGroup *self)
+static INLINE void TG__setDefaultReporter(TestGroup *self)
 {
 	self->reportPlugin = TGReporter_stdout_getInstance();
 }
 
-static inline TGReporter * TG__getReporter(TestGroup *self)
+static INLINE TGReporter * TG__getReporter(TestGroup *self)
 {
 	const int haveValidReportPlugin = NULL != self->reportPlugin;
 
@@ -32,7 +38,7 @@ static inline TGReporter * TG__getReporter(TestGroup *self)
 	return self->reportPlugin;
 }
 
-static inline const char* stringOrDefault(const char *message,const char *defaultValue)
+static INLINE const char* stringOrDefault(const char *message,const char *defaultValue)
 {
 	const int isMessageNull = NULL == message;
 	const int isDefaultNull = NULL == defaultValue;
@@ -47,7 +53,7 @@ static inline const char* stringOrDefault(const char *message,const char *defaul
 	return message;
 }
 
-static inline void TG__flagFailure(TestGroup *self, const TestAssertion *ta)
+static INLINE void TG__flagFailure(TestGroup *self, const TestAssertion *ta)
 {
 	self->testingState.hasFailed=1;
 
@@ -55,7 +61,7 @@ static inline void TG__flagFailure(TestGroup *self, const TestAssertion *ta)
 	TGR_reportFail(reporter, ta);
 }
 
-static inline void TG__flagError(TestGroup *self, const TestAssertion *ta)
+static INLINE void TG__flagError(TestGroup *self, const TestAssertion *ta)
 {
 	self->testingState.hadError=1;
 
@@ -63,27 +69,27 @@ static inline void TG__flagError(TestGroup *self, const TestAssertion *ta)
 	TGR_reportError(reporter, ta);
 }
 
-static inline void TG__recoverFromFailureOrError(TestGroup *self)
+static INLINE void TG__recoverFromFailureOrError(TestGroup *self)
 {
 	longjmp(self->testingState.savedState,1);
 }
 
-static inline void TG__recordErrorOutcome(TestGroup *self)
+static INLINE void TG__recordErrorOutcome(TestGroup *self)
 {
 	++self->outcomeCounters.error;
 
 }
-static inline void TG__recordFailureOutcome(TestGroup *self)
+static INLINE void TG__recordFailureOutcome(TestGroup *self)
 {
 	++self->outcomeCounters.failed;
 }
-static inline void TG__recordAndFlagPassedOutcome(TestGroup *self)
+static INLINE void TG__recordAndFlagPassedOutcome(TestGroup *self)
 {
 	++self->outcomeCounters.passed;
 	TGReporter *const reporter = TG__getReporter(self);
 	TGR_reportPass(reporter);
 }
-static inline void TG__recordOutcome(TestGroup *self)
+static INLINE void TG__recordOutcome(TestGroup *self)
 {
 	const int hadError = self->testingState.hadError;
 	const int hasFailed = !hadError && self->testingState.hasFailed;
@@ -95,30 +101,30 @@ static inline void TG__recordOutcome(TestGroup *self)
 	else
 		TG__recordAndFlagPassedOutcome(self);
 }
-static inline void TG__initTestOutcome(TestGroup *self)
+static INLINE void TG__initTestOutcome(TestGroup *self)
 {
 	self->testingState.hadError=0;
 	self->testingState.hasFailed=0;
 }
-static inline void TG__doBeforeAction(TestGroup *self, TG_Before action)
+static INLINE void TG__doBeforeAction(TestGroup *self, TG_Before action)
 {
     const int isValid = (TG_Before) 0 != action;
 
     if (isValid)
         action(self);
 }
-static inline void TG__doBeforeGroup(TestGroup *self)
+static INLINE void TG__doBeforeGroup(TestGroup *self)
 {
     const TG_Before action = self->testActions.beforeGroup;
     TG__doBeforeAction(self, action);
 }
-static inline void TG__doBeforeTest(TestGroup *self)
+static INLINE void TG__doBeforeTest(TestGroup *self)
 {
 	const TG_Before action = self->testActions.beforeTest;
 	TG__doBeforeAction(self,action);
 }
 
-static inline void TG__doAfterAction(TestGroup *self, TG_After action)
+static INLINE void TG__doAfterAction(TestGroup *self, TG_After action)
 {
     const int isValid = (TG_After) 0 != action;
 
@@ -126,19 +132,19 @@ static inline void TG__doAfterAction(TestGroup *self, TG_After action)
         action(self);
 }
 
-static inline void TG__doAfterTest(TestGroup *self)
+static INLINE void TG__doAfterTest(TestGroup *self)
 {
 	const TG_After action = self->testActions.afterTest;
 	TG__doAfterAction(self, action);
 }
 
-static inline void TG__doAfterGroup(TestGroup *self)
+static INLINE void TG__doAfterGroup(TestGroup *self)
 {
     const TG_After action = self->testActions.afterGroup;
     TG__doAfterAction(self, action);
 }
 
-static inline TestDescriptor *TG__getCurrentTestDescriptor(TestGroup *self)
+static INLINE TestDescriptor *TG__getCurrentTestDescriptor(TestGroup *self)
 {
 	const int currentTest = self->testingState.currentTest;
 	const int isRunning = currentTest < self->testActions.numTests;
@@ -148,7 +154,7 @@ static inline TestDescriptor *TG__getCurrentTestDescriptor(TestGroup *self)
 	else
 		return NULL;
 }
-static inline TG_Test TG__getCurrentTestAction(TestGroup *self)
+static INLINE TG_Test TG__getCurrentTestAction(TestGroup *self)
 {
 	TestDescriptor *const descriptor = TG__getCurrentTestDescriptor(self);
 	const int descriptorIsValid = NULL != descriptor;
@@ -158,7 +164,7 @@ static inline TG_Test TG__getCurrentTestAction(TestGroup *self)
 	else
 		return (TG_Test)0;
 }
-static inline const char *TG__describeCurrentTest(TestGroup *self)
+static INLINE const char *TG__describeCurrentTest(TestGroup *self)
 {
 	TestDescriptor *const descriptor = TG__getCurrentTestDescriptor(self);
 	const int descriptorIsValid = NULL != descriptor;
@@ -168,7 +174,7 @@ static inline const char *TG__describeCurrentTest(TestGroup *self)
 	else
 		return "Invalid test descriptor!";
 }
-static inline void TG__reportMissingTestFunction(TestGroup *self)
+static INLINE void TG__reportMissingTestFunction(TestGroup *self)
 {
     TestAssertion ta;
     TA_init(&ta,TAK_DIRECT);
@@ -177,7 +183,7 @@ static inline void TG__reportMissingTestFunction(TestGroup *self)
     TA_setReason(&ta, "Pointer to testing function is null pointer");
     TG_reportAssertionResult(self, &ta);
 }
-static inline void TG__doTest(TestGroup *self)
+static INLINE void TG__doTest(TestGroup *self)
 {
 	TG_Test test = TG__getCurrentTestAction(self);
 	const int validTest = (TG_Test) 0 != test;
@@ -188,7 +194,7 @@ static inline void TG__doTest(TestGroup *self)
 		TG__reportMissingTestFunction(self);
 }
 
-static inline void TG__callAndRecordTest(TestGroup *self)
+static INLINE void TG__callAndRecordTest(TestGroup *self)
 {
 	++self->outcomeCounters.run;
 	TG__doBeforeTest(self);
@@ -196,7 +202,7 @@ static inline void TG__callAndRecordTest(TestGroup *self)
 }
 
 
-static inline void TG__runActionThatCanFail(TestGroup *self,void (*action)(TestGroup *self))
+static INLINE void TG__runActionThatCanFail(TestGroup *self,void (*action)(TestGroup *self))
 {
 	int backFromAFailure = setjmp(self->testingState.savedState) != 0;
 
@@ -209,7 +215,7 @@ static inline void TG__runActionThatCanFail(TestGroup *self,void (*action)(TestG
 
 }
 
-static inline void TG__runTestAndManageErrors(TestGroup *self)
+static INLINE void TG__runTestAndManageErrors(TestGroup *self)
 {
 	TG__initTestOutcome(self);
 	/* doBeforeTest is executed in the same error frame than test to prevent test from running on a failed initialization*/
@@ -220,13 +226,13 @@ static inline void TG__runTestAndManageErrors(TestGroup *self)
 	TG__recordOutcome(self); /* in case of error this will not get executed */
 }
 
-static inline void TG__announceTest(TestGroup *self)
+static INLINE void TG__announceTest(TestGroup *self)
 {
 	const char *const description = TG__describeCurrentTest(self);
 	TGReporter *reporter = TG__getReporter(self);
 	TGR_reportTest(reporter, description);
 }
-static inline void TG__announceAndRunTest(TestGroup *self)
+static INLINE void TG__announceAndRunTest(TestGroup *self)
 {
 	TestDescriptor *const descriptor= TG__getCurrentTestDescriptor(self);
 	const int isValidDescriptor = NULL != descriptor;
@@ -237,14 +243,14 @@ static inline void TG__announceAndRunTest(TestGroup *self)
 	}
 }
 
-static inline void TG__showOutcome(TestGroup *self)
+static INLINE void TG__showOutcome(TestGroup *self)
 {
 	TGReporter *const reporter = TG__getReporter(self);
 
 	TGR_reportSummary(reporter, &self->outcomeCounters);
 }
 
-static inline void TG__resetOutcomeCounts(TestGroup *self)
+static INLINE void TG__resetOutcomeCounts(TestGroup *self)
 {
 	self->outcomeCounters.run=0;
 	self->outcomeCounters.passed=0;
@@ -252,7 +258,7 @@ static inline void TG__resetOutcomeCounts(TestGroup *self)
 	self->outcomeCounters.error=0;
 }
 
-static inline void TG__showTitle(TestGroup *self)
+static INLINE void TG__showTitle(TestGroup *self)
 {
 	TGReporter *reporter = TG__getReporter(self);
 	const char *const groupName =
@@ -262,23 +268,23 @@ static inline void TG__showTitle(TestGroup *self)
 	TGR_reportBegin(reporter, groupName, numberOfTests);
 }
 
-static inline void TG__selectFirstTest(TestGroup *self)
+static INLINE void TG__selectFirstTest(TestGroup *self)
 {
 	self->testingState.currentTest=0;
 }
-static inline void TG__selectNextTest(TestGroup *self)
+static INLINE void TG__selectNextTest(TestGroup *self)
 {
 	++self->testingState.currentTest;
 }
-static inline int TG__reachedEndOfTests(TestGroup *self)
+static INLINE int TG__reachedEndOfTests(TestGroup *self)
 {
 	return self->testingState.currentTest >= self->testActions.numTests;
 }
-static inline void TG__finishTestRun(TestGroup *self)
+static INLINE void TG__finishTestRun(TestGroup *self)
 {
     self->testingState.currentTest=self->testActions.numTests;
 }
-static inline void TG__updateAfterBeforeGroupAction(TestGroup *self)
+static INLINE void TG__updateAfterBeforeGroupAction(TestGroup *self)
 {
     const int hadError = self->testingState.hadError;
     const int hasFailed = !hadError && self->testingState.hasFailed;
@@ -291,7 +297,7 @@ static inline void TG__updateAfterBeforeGroupAction(TestGroup *self)
         TG__finishTestRun(self);
 }
 
-static inline void TG__initTestRun(TestGroup *self)
+static INLINE void TG__initTestRun(TestGroup *self)
 {
 	TG__showTitle(self);
 	TG__resetOutcomeCounts(self);
@@ -301,7 +307,7 @@ static inline void TG__initTestRun(TestGroup *self)
     TG__updateAfterBeforeGroupAction(self);
 }
 
-static inline void TG__finalizeTestRun(TestGroup *self)
+static INLINE void TG__finalizeTestRun(TestGroup *self)
 {
     TG__initTestOutcome(self);
     TG__runActionThatCanFail(self, TG__doAfterGroup);
@@ -309,7 +315,7 @@ static inline void TG__finalizeTestRun(TestGroup *self)
 	TG__showOutcome(self);
 }
 
-static void TG__flagAssertion(TestGroup *self, const TestAssertion *ta)
+static INLINE void TG__flagAssertion(TestGroup *self, const TestAssertion *ta)
 {
     const TAResult result = TA_getResult(ta);
     const int isFailure = TA_FAIL == result;

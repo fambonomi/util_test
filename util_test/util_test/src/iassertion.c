@@ -7,30 +7,36 @@
 
 #include <iassertion_impl.h>
 
-static void TA__unsetMessage(TestAssertion *self)
+#ifdef NO_INLINE
+#define INLINE
+#else
+#define INLINE inline
+#endif
+
+static INLINE void TA__unsetMessage(TestAssertion *self)
 {
     self->message = "No description given";
 }
-static void TA__unsetReason(TestAssertion *self)
+static INLINE void TA__unsetReason(TestAssertion *self)
 {
     self->reason = "No reason given";
 }
-static void TA__unsetFile(TestAssertion *self)
+static INLINE void TA__unsetFile(TestAssertion *self)
 {
     self->position.file = "<No file given>";
 }
-static void TA__unsetFunc(TestAssertion *self)
+static INLINE void TA__unsetFunc(TestAssertion *self)
 {
     self->position.func = "<No function given>";
 }
-static void TA_mem__init(TestAssertion *self)
+static INLINE void TA_mem__init(TestAssertion *self)
 {
     self->detail.mem_kind.A=NULL;
     self->detail.mem_kind.B=NULL;
     self->detail.mem_kind.length=0;
 }
 
-static void TA__initDefaultValues(TestAssertion *self)
+static INLINE void TA__initDefaultValues(TestAssertion *self)
 {
     TA__unsetMessage(self);
     TA__unsetReason(self);

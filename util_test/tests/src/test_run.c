@@ -4,12 +4,8 @@
  *  Created on: 20 abr. 2021
  *      Author: Fernando
  */
-
-int testRun_TestGroup_base(void);
-int testRun_TestGroup_beforeAndAfter(void);
-int testRun_TestGroup_nullStrings(void);
-int testRun_assertions(void);
-int testRun_assertionInterface(void);
+#include <stdio.h> /*printf*/
+#include <test_run.h>
 int main(void)
 {
 	int someTestFailed = testRun_TestGroup_base();
@@ -17,5 +13,7 @@ int main(void)
 	someTestFailed |= testRun_TestGroup_nullStrings();
 	someTestFailed |= testRun_assertions();
 	someTestFailed |= testRun_assertionInterface();
+	if (someTestFailed)
+	    printf("\n-----------------\nTHERE WERE ERRORS\n-----------------\n");
 	return !!someTestFailed;
 }

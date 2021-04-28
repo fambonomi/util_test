@@ -9,6 +9,7 @@
 #include <assertions.h>
 #include <tgreporter_stub.h>
 #include <string.h> /*memcmp*/
+#include <test_run.h>
 
 static void mockTest_assertTrue_true(TestGroup *tg)
 {
@@ -64,8 +65,8 @@ static void mockTest_assertMemoryEqual(TestGroup *tg)
     const size_t length = mockTestParams.memBlocks.length;
     int expectedOutcome = 3;
     static const char* outcomes[]={
-            "This should pass",
             "This should fail",
+            "This should pass",
             "This should be an error",
             "Internal error!"
     };
@@ -87,8 +88,8 @@ static void mockTest_assertMemoryNotEqual(TestGroup *tg)
     const size_t length = mockTestParams.memBlocks.length;
     int expectedOutcome = 3;
     static const char* outcomes[]={
-            "This should fail",
             "This should pass",
+            "This should fail",
             "This should be an error",
             "Internal error!"
     };
@@ -301,6 +302,7 @@ static TestDescriptor tests[]={
 };
 
 static int numTests = sizeof(tests)/sizeof(*tests);
+
 
 int testRun_assertions(void)
 {

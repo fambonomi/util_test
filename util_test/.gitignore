@@ -1,1 +1,5 @@
 /Test_run/
+/Release_with_MCU ARM GCC/
+/Debug_with_MinGW GCC/
+/Release_with_MinGW GCC/
+/Debug_with_MCU ARM GCC/

@@ -7,6 +7,7 @@
 
 #include <test.h>
 #include <assertions.h>
+#include <test_run.h>
 
 static void stub_test(TestGroup *tg)
 {
@@ -14,7 +15,7 @@ static void stub_test(TestGroup *tg)
 }
 
 static inline void assertOutcomesAreEqual(TestGroup *tg,
-		char *message,
+		const char *message,
 		const TestGroupOutcome *expected,
 		const TestGroupOutcome *actual)
 {
@@ -69,6 +70,21 @@ static void test_unnamedTest(TestGroup *tg)
             &expectedOutcome, actualOutcome);
 }
 
+static void test_nullDescriptor(TestGroup *tg)
+{
+    TestGroup mockGroup;
+    TestDescriptor *tests =NULL;
+
+    TG_init(&mockGroup, "Group with a null test descriptor should do nothing");
+    TG_setTests(&mockGroup, tests, 1);
+    TG_runTests(&mockGroup);
+
+    const TestGroupOutcome expectedOutcome ={.error=0,.failed=0,.passed=0,.run=0};
+    const TestGroupOutcome *actualOutcome = TG_getTestOutcome(&mockGroup);
+    assertOutcomesAreEqual(tg,"Test having a null test descriptor didn't run as expected!",
+            &expectedOutcome, actualOutcome);
+}
+
 
 int testRun_TestGroup_nullStrings(void)
 {
@@ -77,6 +93,7 @@ int testRun_TestGroup_nullStrings(void)
 			{"Group with null name shall run normally.",test_unamedGroup},
 			{"Group with a null function pointer should give an error for that function.",test_nullFP},
 			{"Group with a test with null name",test_unnamedTest},
+			{"Null test descriptor",test_nullDescriptor},
 	};
 	static int numTests = sizeof(tests)/sizeof(*tests);
 	TG_init(&group,NULL);

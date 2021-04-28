@@ -8,7 +8,7 @@
 #include <iassertion_impl.h>
 #include <assertions.h>
 #include <stdint.h> /*intptr_t*/
-
+#include <test_run.h>
 
 static inline void empty_assertion_consistency(
         TestGroup *tg,const TestAssertion *assertion,TAKind initKind)
@@ -206,8 +206,8 @@ static void test_numAssertionOperand(TestGroup *tg)
     TestAssertion assertion={0};
     TA_init(&assertion,TAK_NUM);
 
-    numAssertion_testOperand(tg, &assertion, 0x9669966996699669LL,0xc33cc33cc33cc33cLL);
-    numAssertion_testOperand(tg, &assertion, 0x0123456789ABCDEFLL,0xFEDCBA9876543210LL);
+    numAssertion_testOperand(tg, &assertion, 0x6996699669966996LL,0x3cc33cc33cc33cc3LL);
+    numAssertion_testOperand(tg, &assertion, 0x0123456789ABCDEFLL,0x7EDCBA98F6543210LL);
 }
 
 static inline void memAssertion_testOperator(TestGroup *tg, TestAssertion *ta, TAOperator op)

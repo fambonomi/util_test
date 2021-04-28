@@ -10,13 +10,19 @@
 #include <iassertion_impl.h>
 #include <test_impl.h>
 
-static void TA__setPosition(TestAssertion *ta,const char *func,const char *file,int line)
+#ifdef NO_INLINE
+#define INLINE
+#else
+#define INLINE inline
+#endif
+
+static INLINE void TA__setPosition(TestAssertion *ta,const char *func,const char *file,int line)
 {
     TA_setFunc(ta, func);
     TA_setFile(ta, file);
     TA_setLine(ta, line);
 }
-static void TA__initAssertBoolFailed(TestAssertion *ta,int A,TAOperator op)
+static INLINE void TA__initAssertBoolFailed(TestAssertion *ta,int A,TAOperator op)
 {
     TA_init(ta, TAK_BOOL);
     TA_setResult(ta, TA_FAIL);
@@ -24,7 +30,7 @@ static void TA__initAssertBoolFailed(TestAssertion *ta,int A,TAOperator op)
     TA_bool_setOperator(ta,op);
 }
 
-static void TA__initAssertNumFailed(TestAssertion *ta,long long int A,long long int B,TAOperator op)
+static INLINE void TA__initAssertNumFailed(TestAssertion *ta,long long int A,long long int B,TAOperator op)
 {
     TA_init(ta, TAK_NUM);
     TA_setResult(ta, TA_FAIL);
@@ -33,7 +39,7 @@ static void TA__initAssertNumFailed(TestAssertion *ta,long long int A,long long 
     TA_num_setB(ta, B);
 }
 
-static void TA__initAssertMemoryFail(TestAssertion *ta,const void *A,const void *B,size_t length,TAOperator op)
+static INLINE void TA__initAssertMemoryFail(TestAssertion *ta,const void *A,const void *B,size_t length,TAOperator op)
 {
     TA_init(ta, TAK_MEM);
     TA_setResult(ta, TA_FAIL);
@@ -42,7 +48,7 @@ static void TA__initAssertMemoryFail(TestAssertion *ta,const void *A,const void 
     TA_mem_setB(ta, B);
     TA_mem_setLength(ta, length);
 }
-static void TA__initAssertBadPtr(TestAssertion *ta,const void *A,const void *B,size_t length,TAOperator op)
+static INLINE void TA__initAssertBadPtr(TestAssertion *ta,const void *A,const void *B,size_t length,TAOperator op)
 {
     TA_init(ta,TAK_MEM);
     TA_setResult(ta, TA_ERROR);
@@ -52,7 +58,7 @@ static void TA__initAssertBadPtr(TestAssertion *ta,const void *A,const void *B,s
     TA_mem_setLength(ta, length);
 }
 
-static void TG__assertMemoryBadPtrGuard(
+static INLINE void TG__assertMemoryBadPtrGuard(
         TestGroup *tg,TestAssertion *ta, const char *message, const void *A,
         const void *B, size_t length, TAOperator op,
         const char *func,const char *file,int line)
@@ -70,7 +76,7 @@ static void TG__assertMemoryBadPtrGuard(
     }
 }
 
-static int memoryEqual(const void *A,const void *B,size_t length)
+static INLINE int memoryEqual(const void *A,const void *B,size_t length)
 {
     const int logicallyEqual = A == B ||
                                0 == length;

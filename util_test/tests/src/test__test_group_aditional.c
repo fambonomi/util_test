@@ -9,6 +9,7 @@
 #include <string.h> /*memset*/
 #include <tgreporter_stub.h>
 #include <assertions.h> /* TG_fail, TG_error */
+#include <test_run.h>
 
 #define STRING_BUFFER_SIZE 256
 struct {

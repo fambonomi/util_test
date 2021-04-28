@@ -7,6 +7,7 @@
 
 #ifndef INCLUDE_IASSERTION_H_
 #define INCLUDE_IASSERTION_H_
+#include <stddef.h> /*size_t*/
 
 typedef struct TestAssertion TestAssertion;
 typedef enum {TA_PASS=0, TA_FAIL, TA_ERROR,TA_MAX=TA_ERROR}TAResult;
