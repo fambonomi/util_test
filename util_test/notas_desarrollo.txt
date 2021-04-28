@@ -293,6 +293,11 @@ Historia BeforeGroup -- 1 punto
 Historia AfterGroup -- 1 punto
 --fin 2021-04-25 21:30
 [scrum 3: 5h14m]
+# Detalles
+puntos planificados: 8
+puntos realizados: 8
+estado final: verde
+tiempo total: 5h14m
 
 [scrum 4]
 Historia Interfaz resultado de aserción-- 4 puntos
@@ -309,6 +314,21 @@ Debe existir una estructura que represente el resultado de una aserción, falla 
 Esta estructura debe incluir una parte variante para acomodar los parámetros originales de
 la aserción y una sección para los parámetros de ubicación __func__ __FILE__ y __LINE__.
 
+Historia Integrar el nuevo objeto aserción para conectar TestGroup con assertions y TGReporter -- 4 puntos
+
+Todo el proceso de aserción, incluído lo que actualmente realiza TG_fail y TG_error debe ser implementado
+en el módulo assertions. TestGroup debe ser un usuario de la clase TestAssertion, aceptando objetos generados
+por assertions y transmitiéndolos a TestReporter. El campo result será usado para determinar el resultado
+de la prueba (FAIL o ERROR). Las aserciones marcadas como PASS serán ignoradas. El módulo TGReporter será también
+usuario de TestAssertion. Deberá actuar de acuerdo al tipo de aserción para presentar correctamente los resultados.
+
+Criterios de aceptación:
+El sistema reestructurado debe funcionar de la misma forma que el original, puesto que el cambio es interno. Será
+posible una mejor prueba unitaria de los componentes de assert con el nuevo sistema, pero no es necesario implementarla
+para cumplir esta historia.
+
+Puntos planificados: 8 puntos
+
 # Tiempo
 -- inicio 2021-04-26 13:08
 -- pausa 2021-04-26 14:51
@@ -320,3 +340,16 @@ la aserción y una sección para los parámetros de ubicación __func__ __FILE__
 Finalizada Historia Interfaz resultado de aserción-- 4 puntos
 -- pausa 2021-04-27 16:31
 [scrum 4:5h15m]
+-- inicio 2021-04-27 19:59
+-- pausa 2021-04-27 20:32
+-- inicio 2021-04-27 22:26
+Finalizada Historia Integrar el nuevo objeto aserción para conectar TestGroup con assertions y TGReporter -- 4 puntos
+-- fin 2021-04-28 00:17
+[scrum 7h39m]
+
+# Detalles
+puntos planificados: 8
+puntos realizados: 8
+estado final: verde
+tiempo total: 7h39m
+

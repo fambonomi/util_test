@@ -6,11 +6,13 @@
  */
 
 
-#include <test.h>
+#include <test_impl.h>
 #include <setjmp.h> /*setjmp, longjmp*/
 #include <string.h> /*memset*/
 #include <stddef.h> /*NULL*/
 #include <tgreporter_stdout.h>
+#include <iassertion_impl.h>
+
 /**
  * Static function section
  */
@@ -45,22 +47,20 @@ static inline const char* stringOrDefault(const char *message,const char *defaul
 	return message;
 }
 
-static inline void TG__flagFailure(TestGroup *self, const char *msg)
+static inline void TG__flagFailure(TestGroup *self, const TestAssertion *ta)
 {
 	self->testingState.hasFailed=1;
 
-	msg = stringOrDefault(msg, "Failure with no reason given.");
 	TGReporter * const reporter = TG__getReporter(self);
-	TGR_reportFail(reporter, msg);
+	TGR_reportFail(reporter, ta);
 }
 
-static inline void TG__flagError(TestGroup *self, const char *msg)
+static inline void TG__flagError(TestGroup *self, const TestAssertion *ta)
 {
 	self->testingState.hadError=1;
 
-	msg = stringOrDefault(msg, "An error happened but there is no specific error message.");
 	TGReporter *const reporter =TG__getReporter(self);
-	TGR_reportError(reporter, msg);
+	TGR_reportError(reporter, ta);
 }
 
 static inline void TG__recoverFromFailureOrError(TestGroup *self)
@@ -168,6 +168,15 @@ static inline const char *TG__describeCurrentTest(TestGroup *self)
 	else
 		return "Invalid test descriptor!";
 }
+static inline void TG__reportMissingTestFunction(TestGroup *self)
+{
+    TestAssertion ta;
+    TA_init(&ta,TAK_DIRECT);
+    TA_setResult(&ta, TA_ERROR);
+    TA_setMessage(&ta, "Cannot proceed with test");
+    TA_setReason(&ta, "Pointer to testing function is null pointer");
+    TG_reportAssertionResult(self, &ta);
+}
 static inline void TG__doTest(TestGroup *self)
 {
 	TG_Test test = TG__getCurrentTestAction(self);
@@ -176,7 +185,7 @@ static inline void TG__doTest(TestGroup *self)
 	if (validTest)
 		test(self);
 	else
-		TG_error(self, "Missing testing function");
+		TG__reportMissingTestFunction(self);
 }
 
 static inline void TG__callAndRecordTest(TestGroup *self)
@@ -300,6 +309,30 @@ static inline void TG__finalizeTestRun(TestGroup *self)
 	TG__showOutcome(self);
 }
 
+static void TG__flagAssertion(TestGroup *self, const TestAssertion *ta)
+{
+    const TAResult result = TA_getResult(ta);
+    const int isFailure = TA_FAIL == result;
+    const int isError = TA_ERROR == result;
+
+    if(isFailure)
+        TG__flagFailure(self,ta);
+    else if(isError)
+        TG__flagError(self,ta);
+
+    if(isFailure || isError)
+        TG__recoverFromFailureOrError(self);
+}
+/**
+ * Public implementation API
+ */
+
+void TG_reportAssertionResult(TestGroup *self, const TestAssertion *ta)
+{
+    if (self->testingState.canFail)
+        TG__flagAssertion(self,ta);
+}
+
 /**
  * Public API
  */
@@ -372,24 +405,6 @@ int TG_countErrors(TestGroup *self)
 	return self->outcomeCounters.error;
 }
 
-
-void TG_fail(TestGroup *self, const char *msg)
-{
-	if(self->testingState.canFail)
-	{
-		TG__flagFailure(self,msg);
-		TG__recoverFromFailureOrError(self);
-	}
-}
-
-void TG_error(TestGroup *self, const char *msg)
-{
-	if(self->testingState.canFail)
-	{
-		TG__flagError(self,msg);
-		TG__recoverFromFailureOrError(self);
-	}
-}
 const TestGroupOutcome *TG_getTestOutcome(TestGroup *self)
 {
 	return &self->outcomeCounters;

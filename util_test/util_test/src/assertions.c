@@ -7,90 +7,152 @@
 #include <assertions.h>
 #include <stdio.h> /*snprintf*/
 #include <string.h> /*memcmp*/
+#include <iassertion_impl.h>
+#include <test_impl.h>
 
-#define BUFFER_LEN 512
-static char buffer[BUFFER_LEN];
-
-static inline char *assertBooleanMessage(const char* message,const char* reason,const char *func,const char *file,int line)
+static void TA__setPosition(TestAssertion *ta,const char *func,const char *file,int line)
 {
-	snprintf(buffer,BUFFER_LEN,"%s\n Reason: %s\n  In function %s\n  In file %s\n  In line %d\n",
-			message,reason,func,file,line);
-	return buffer;
+    TA_setFunc(ta, func);
+    TA_setFile(ta, file);
+    TA_setLine(ta, line);
 }
+static void TA__initAssertBoolFailed(TestAssertion *ta,int A,TAOperator op)
+{
+    TA_init(ta, TAK_BOOL);
+    TA_setResult(ta, TA_FAIL);
+    TA_bool_setA(ta, A);
+    TA_bool_setOperator(ta,op);
+}
+
+static void TA__initAssertNumFailed(TestAssertion *ta,long long int A,long long int B,TAOperator op)
+{
+    TA_init(ta, TAK_NUM);
+    TA_setResult(ta, TA_FAIL);
+    TA_num_setOperator(ta, op);
+    TA_num_setA(ta, A);
+    TA_num_setB(ta, B);
+}
+
+static void TA__initAssertMemoryFail(TestAssertion *ta,const void *A,const void *B,size_t length,TAOperator op)
+{
+    TA_init(ta, TAK_MEM);
+    TA_setResult(ta, TA_FAIL);
+    TA_mem_setOperator(ta, op);
+    TA_mem_setA(ta, A);
+    TA_mem_setB(ta, B);
+    TA_mem_setLength(ta, length);
+}
+static void TA__initAssertBadPtr(TestAssertion *ta,const void *A,const void *B,size_t length,TAOperator op)
+{
+    TA_init(ta,TAK_MEM);
+    TA_setResult(ta, TA_ERROR);
+    TA_mem_setOperator(ta, op);
+    TA_mem_setA(ta, A);
+    TA_mem_setB(ta, B);
+    TA_mem_setLength(ta, length);
+}
+
+static void TG__assertMemoryBadPtrGuard(
+        TestGroup *tg,TestAssertion *ta, const char *message, const void *A,
+        const void *B, size_t length, TAOperator op,
+        const char *func,const char *file,int line)
+{
+    const char *const reason = "Asked to dereference null pointer.";
+    const int validPointers = (const void*) 0 != A &&
+                              (const void*) 0 != B;
+    if(!validPointers)
+    {
+        TA__initAssertBadPtr(ta, A, B, length, op);
+        TA_setMessage(ta, message);
+        TA_setReason(ta, reason);
+        TA__setPosition(ta, func, file, line);
+        TG_reportAssertionResult(tg, ta);
+    }
+}
+
+static int memoryEqual(const void *A,const void *B,size_t length)
+{
+    const int logicallyEqual = A == B ||
+                               0 == length;
+
+    return logicallyEqual || !memcmp(A,B,length);
+
+}
+
+/**
+ * Public API
+ */
 
 void TG_assertTrue(TestGroup *tg,const char* message,int value,const char *func,const char *file,int line)
 {
-	static const char failReason[]="Value that should be true is false";
-	if(!value)
-		TG_fail(tg,assertBooleanMessage(message,failReason,func,file,line));
+    TestAssertion ta;
+    if(!value)
+    {
+        TA__initAssertBoolFailed(&ta, value, TAO_IS_TRUE);
+        TA_setMessage(&ta, message);
+        TA_setReason(&ta, "Value that should be true is false");
+        TA__setPosition(&ta, func, file, line);
+        TG_reportAssertionResult(tg, &ta);
+    }
 }
 
 void TG_assertFalse(TestGroup *tg,const char* message,int value,const char *func,const char *file,int line)
 {
-	static const char failReason[]="Value that should be false is true";
-	if(value)
-		TG_fail(tg,assertBooleanMessage(message,failReason,func,file,line));
+    TestAssertion ta;
+    if(value)
+    {
+        TA__initAssertBoolFailed(&ta, value, TAO_IS_FALSE);
+        TA_setMessage(&ta, message);
+        TA_setReason(&ta, "Value that should be false is true");
+        TA__setPosition(&ta, func, file, line);
+        TG_reportAssertionResult(tg, &ta);
+    }
 }
-
-
-static inline const char* assertIntMessage(const char* message,const char* reason,
-                                           long long int A,long long int B,
-                                           const char *func,const char *file,int line)
-{
-    snprintf(buffer,BUFFER_LEN,"%s\n Reason: %s\n  With A = %lld\n  With B = %lld\n  In function %s\n  In file %s\n  In line %d\n",
-            message,reason,A,B,func,file,line);
-    return buffer;
-}
-
 
 void TG_assertIntEqual(TestGroup *tg,const char* message,long long int A,long long int B,const char *func,const char *file,int line)
 {
+    TestAssertion ta;
     const char* reason = "Integers A and B should have been equal";
-
-    if (A != B)
-        TG_fail(tg,assertIntMessage(message, reason, A, B, func, file, line));
+    if (A != B){
+        TA__initAssertNumFailed(&ta, A, B, TAO_EQ);
+        TA_setMessage(&ta, message);
+        TA_setReason(&ta, reason);
+        TA__setPosition(&ta, func, file, line);
+        TG_reportAssertionResult(tg, &ta);
+    }
 }
 
 void TG_assertIntNotEqual(TestGroup *tg,const char* message,long long int A,long long int B,const char *func,const char *file,int line)
 {
+    TestAssertion ta;
     const char* reason = "Integers A and B should have been different";
-
-    if (A == B)
-        TG_fail(tg,assertIntMessage(message, reason, A, B, func, file, line));
-}
-
-static inline const char* assertMemoryMessage(const char* message,const char* reason,
-                                           const void* A, const void *B,size_t length,
-                                           const char *func,const char *file,int line)
-{
-    snprintf(buffer,BUFFER_LEN,"%s\n Reason: %s\n  With A = %p\n  With B = %p\n  Length: %llu\n  In function %s\n  In file %s\n  In line %d\n",
-            message,reason,A,B,(unsigned long long int) length, func,file,line);
-    return buffer;
+    if (A == B){
+        TA__initAssertNumFailed(&ta, A, B, TAO_NEQ);
+        TA_setMessage(&ta, message);
+        TA_setReason(&ta, reason);
+        TA__setPosition(&ta, func, file, line);
+        TG_reportAssertionResult(tg, &ta);
+    }
 }
 
 void TG_assertMemoryEqual(TestGroup *tg,const char* message,
                           const void *A,const void *B, size_t length,
                           const char *func,const char *file, int line)
 {
-    const char* reason = "Content of memory blocks A and B should be the same but is different";
-    const char* reasonError = "Asked to dereference a null pointer, given pointers A and B.";
+    TestAssertion ta;
+    const TAOperator op = TAO_EQ;
+    const char* reason = "Content of memory blocks should be the same but is different";
 
-    const int validPointers = (const void*) 0 != A &&
-                              (const void*) 0 != B;
+    TG__assertMemoryBadPtrGuard(tg, &ta, message, A, B, length, op, func, file, line);
 
-    const int logicallyEqual = A == B ||
-                               0 == length;
-
-    if (!validPointers)
-        TG_error(tg,assertMemoryMessage(message, reasonError,
-                                        A, B, length, func, file, line));
-
-    const int equal = logicallyEqual ||
-                      !memcmp(A,B,length);
-
-    if (!equal)
-            TG_fail(tg,assertMemoryMessage(message, reason,
-                            A, B, length, func, file, line));
+    if (!memoryEqual(A, B, length))
+    {
+        TA__initAssertMemoryFail(&ta, A, B, length, op);
+        TA_setMessage(&ta, message);
+        TA_setReason(&ta, reason);
+        TA__setPosition(&ta, func, file, line);
+        TG_reportAssertionResult(tg, &ta);
+    }
 }
 
 
@@ -98,23 +160,42 @@ void TG_assertMemoryNotEqual(TestGroup *tg,const char* message,
                           const void *A,const void *B, size_t length,
                           const char *func,const char *file, int line)
 {
-    const char* reason = "Content of memory blocks A and B should be different but is the same";
-    const char* reasonError = "Asked to dereference a null pointer, given pointers A and B.";
+    TestAssertion ta;
+    const TAOperator op = TAO_NEQ;
+    const char* reason = "Content of memory blocks should be different but is the same";
 
-    const int validPointers = (const void*) 0 != A &&
-                              (const void*) 0 != B;
+    TG__assertMemoryBadPtrGuard(tg, &ta, message, A, B, length, op, func, file, line);
 
-    const int logicallyEqual = A == B ||
-                               0 == length;
+    if (memoryEqual(A, B, length))
+    {
+        TA__initAssertMemoryFail(&ta, A, B, length, op);
+        TA_setMessage(&ta, message);
+        TA_setReason(&ta, reason);
+        TA__setPosition(&ta, func, file, line);
+        TG_reportAssertionResult(tg, &ta);
+    }
+}
 
-    if (!validPointers)
-        TG_error(tg,assertMemoryMessage(message, reasonError,
-                                        A, B, length, func, file, line));
+void TG_fail(TestGroup *tg, const char *message, const char *reason,const char *func,const char *file, int line)
+{
+    TestAssertion ta;
 
-    const int equal = logicallyEqual ||
-                      !memcmp(A,B,length);
+    TA_init(&ta, TAK_DIRECT);
+    TA_setResult(&ta, TA_FAIL);
+    TA_setMessage(&ta, message);
+    TA_setReason(&ta, reason);
+    TA__setPosition(&ta, func, file, line);
+    TG_reportAssertionResult(tg, &ta);
+}
 
-    if (equal)
-            TG_fail(tg,assertMemoryMessage(message, reason,
-                            A, B, length, func, file, line));
+void TG_error(TestGroup *tg,const char *message, const char *reason,const char *func,const char *file, int line)
+{
+    TestAssertion ta;
+
+    TA_init(&ta, TAK_DIRECT);
+    TA_setResult(&ta, TA_ERROR);
+    TA_setMessage(&ta, message);
+    TA_setReason(&ta, reason);
+    TA__setPosition(&ta, func, file, line);
+    TG_reportAssertionResult(tg, &ta);
 }

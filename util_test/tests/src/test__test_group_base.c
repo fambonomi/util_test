@@ -8,6 +8,7 @@
 #include <test.h>
 #include <string.h> /* memset */
 #include <stdio.h> /* printf */
+#include <assertions.h> /* TG_fail TG_error */
 
 static struct EstadoTests_TestGroup{
 	TestGroup grupo;
@@ -73,14 +74,14 @@ static void pruebaStub(TestGroup *tg)
 static void pruebaFalla(TestGroup *tg)
 {
 	registraEjecucionFalla();
-	TG_fail(tg,"Esta prueba siempre falla!");
+	REPORT_FAIL(tg,"Esta prueba siempre falla!","Es un mock.");
 	printf("ESTO NO DEBIERA VERSE\n");
 }
 
 static void pruebaConError(TestGroup *tg)
 {
 	registraEjecucionError();
-	TG_error(tg, "Un problema externo impidió ejecutar esta prueba");
+	REPORT_ERROR(tg, "Un problema externo impidió ejecutar esta prueba","Es un mock.");
 	printf("ESTO NO DEBIERA VERSE\n");
 }
 static TestDescriptor pruebas[]={

@@ -131,19 +131,23 @@ static inline int testResultsAsExpected(const char * description,TG_Test test,Ex
 
     return verifyExpecedResults(&group, passed, failed, error);
 }
+static void mockTestResultUnexpected(TestGroup *tg,const char* message)
+{
+    REPORT_ERROR(tg,message,"Mock test yields unexpected result.");
+
+}
 static void test_assertTrue_true(TestGroup *tg)
 {
     if (!testResultsAsExpected("assertTrue of true",
             mockTest_assertTrue_true, PASSED))
-        TG_error(tg,"assertTrue of true must succeed");
-
+        mockTestResultUnexpected(tg, "assertTrue of true must succeed");
 }
 
 static void test_assertTrue_false(TestGroup *tg)
 {
     if (!testResultsAsExpected("assertTrue of false",
             mockTest_assertTrue_false, FAILED))
-        TG_error(tg,"assertTrue of false must fail");
+        mockTestResultUnexpected(tg,"assertTrue of false must fail");
 
 }
 
@@ -151,7 +155,7 @@ static void test_assertFalse_true(TestGroup *tg)
 {
     if (!testResultsAsExpected("assertFalse of true",
             mockTest_assertFalse_true, FAILED))
-        TG_error(tg,"assertFalse of true must fail");
+        mockTestResultUnexpected(tg,"assertFalse of true must fail");
 
 }
 
@@ -159,7 +163,7 @@ static void test_assertFalse_false(TestGroup *tg)
 {
     if (!testResultsAsExpected("assertFalse of false",
             mockTest_assertFalse_false, PASSED))
-        TG_error(tg,"assertFalse of false must pass");
+        mockTestResultUnexpected(tg,"assertFalse of false must pass");
 
 }
 
@@ -169,7 +173,7 @@ static void test_assertIntEqual_pass(TestGroup *tg)
     mockTestParams.integers.B=mockTestParams.integers.A;
     if (!testResultsAsExpected("assertIntEqual for A==B",
             mockTest_assertIntEqual, PASSED))
-        TG_error(tg,"assertIntEqual must pass if A==B");
+        mockTestResultUnexpected(tg,"assertIntEqual must pass if A==B");
 }
 
 static void test_assertIntEqual_fail(TestGroup *tg)
@@ -178,7 +182,7 @@ static void test_assertIntEqual_fail(TestGroup *tg)
     mockTestParams.integers.B=-mockTestParams.integers.A;
     if (!testResultsAsExpected("assertIntEqual for A!=B",
             mockTest_assertIntEqual, FAILED))
-        TG_error(tg,"assertIntEqual must fail if A!=B");
+        mockTestResultUnexpected(tg,"assertIntEqual must fail if A!=B");
 }
 
 static void test_assertIntNotEqual_fail(TestGroup *tg)
@@ -187,7 +191,7 @@ static void test_assertIntNotEqual_fail(TestGroup *tg)
     mockTestParams.integers.B=mockTestParams.integers.A;
     if (!testResultsAsExpected("assertIntNotEqual for A==B",
             mockTest_assertIntNotEqual, FAILED))
-        TG_error(tg,"assertIntNotEqual must fail if A==B");
+        mockTestResultUnexpected(tg,"assertIntNotEqual must fail if A==B");
 }
 
 static void test_assertIntNotEqual_pass(TestGroup *tg)
@@ -196,7 +200,7 @@ static void test_assertIntNotEqual_pass(TestGroup *tg)
     mockTestParams.integers.B=0x0f0f0f0ff0f0f0f0LL;
     if (!testResultsAsExpected("assertIntNotEqual for A!=B",
             mockTest_assertIntNotEqual, PASSED))
-        TG_error(tg,"assertIntNotEqual must pass if A!=B");
+        mockTestResultUnexpected(tg,"assertIntNotEqual must pass if A!=B");
 }
 
 static void test_assertMemoryEqual_pass(TestGroup *tg)
@@ -209,7 +213,7 @@ static void test_assertMemoryEqual_pass(TestGroup *tg)
 
     if(!testResultsAsExpected("assertMemoryEqual for blocks with identical contents",
             mockTest_assertMemoryEqual, PASSED))
-        TG_error(tg, "assertMemoryEqual must pass for blocks with identical contents");
+        mockTestResultUnexpected(tg, "assertMemoryEqual must pass for blocks with identical contents");
 }
 
 static void test_assertMemoryEqual_fail(TestGroup *tg)
@@ -222,7 +226,7 @@ static void test_assertMemoryEqual_fail(TestGroup *tg)
 
     if(!testResultsAsExpected("assertMemoryEqual for blocks with different contents",
             mockTest_assertMemoryEqual, FAILED))
-        TG_error(tg, "assertMemoryEqual must fail for blocks with different contents");
+        mockTestResultUnexpected(tg, "assertMemoryEqual must fail for blocks with different contents");
 }
 
 static void test_assertMemoryEqual_error(TestGroup *tg)
@@ -233,7 +237,7 @@ static void test_assertMemoryEqual_error(TestGroup *tg)
 
     if(!testResultsAsExpected("assertMemoryEqual with null pointer",
             mockTest_assertMemoryEqual, ERROR))
-        TG_error(tg, "assertMemoryEqual should give an error if asked to dereference a null pointer");
+        mockTestResultUnexpected(tg, "assertMemoryEqual should give an error if asked to dereference a null pointer");
 }
 
 static void test_assertMemoryNotEqual_fail(TestGroup *tg)
@@ -246,7 +250,7 @@ static void test_assertMemoryNotEqual_fail(TestGroup *tg)
 
     if(!testResultsAsExpected("assertMemoryNotEqual for blocks with identical contents",
             mockTest_assertMemoryNotEqual, FAILED))
-        TG_error(tg, "assertMemoryNotEqual must fail for blocks with identical contents");
+        mockTestResultUnexpected(tg, "assertMemoryNotEqual must fail for blocks with identical contents");
 }
 
 static void test_assertMemoryNotEqual_pass(TestGroup *tg)
@@ -259,7 +263,7 @@ static void test_assertMemoryNotEqual_pass(TestGroup *tg)
 
     if(!testResultsAsExpected("assertMemoryNotEqual for blocks with different contents",
             mockTest_assertMemoryNotEqual, PASSED))
-        TG_error(tg, "assertMemoryNotEqual must pass for blocks with different contents");
+        mockTestResultUnexpected(tg, "assertMemoryNotEqual must pass for blocks with different contents");
 }
 
 static void test_assertMemoryNotEqual_error(TestGroup *tg)
@@ -270,7 +274,7 @@ static void test_assertMemoryNotEqual_error(TestGroup *tg)
 
     if(!testResultsAsExpected("assertMemoryNotEqual with null pointer",
             mockTest_assertMemoryNotEqual, ERROR))
-        TG_error(tg, "assertMemoryNotEqual should give an error if asked to dereference a null pointer");
+        mockTestResultUnexpected(tg, "assertMemoryNotEqual should give an error if asked to dereference a null pointer");
 }
 
 static TestDescriptor tests[]={

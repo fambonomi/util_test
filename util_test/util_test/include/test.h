@@ -70,8 +70,6 @@ void TG_setAfterGroupAction(TestGroup *self, TG_After afterGroup);
 void TG_setBeforeTestAction(TestGroup *self,TG_Before beforeTest);
 void TG_setAfterTestAction(TestGroup *self,TG_After afterTest);
 void TG_setTests(TestGroup *self, TestDescriptor *tests, int numTests);
-void TG_fail(TestGroup *self, const char *msg);
-void TG_error(TestGroup *self, const char *msg);
 void TG_runTests(TestGroup *self);
 int TG_countExecuted(TestGroup *self);
 int TG_countPassed(TestGroup *self);

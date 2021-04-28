@@ -8,6 +8,7 @@
 #include <test.h>
 #include <string.h> /*memset*/
 #include <tgreporter_stub.h>
+#include <assertions.h> /* TG_fail, TG_error */
 
 #define STRING_BUFFER_SIZE 256
 struct {
@@ -45,13 +46,13 @@ static void mockActionSucceed(TestGroup *tg)
 static void mockActionFail(TestGroup *tg)
 {
 	countActionRun();
-	TG_fail(tg, "Before test action failed");
+	REPORT_FAIL(tg, "Before action failed","Mock action that always fails");
 }
 
 static void mockActionError(TestGroup *tg)
 {
 	countActionRun();
-	TG_error(tg, "Before test action encountered an error");
+	REPORT_ERROR(tg, "Before action encountered an error","Mock action that simulates an error.");
 }
 
 
@@ -65,13 +66,13 @@ static void mockTestPass(TestGroup *tg)
 static void mockTestFail(TestGroup *tg)
 {
 	countTestRun();
-	TG_fail(tg,"Test failed");
+	REPORT_FAIL(tg,"Test failed.","Mock test that fails.");
 }
 
 static void mockTestError(TestGroup *tg)
 {
 	countTestRun();
-	TG_error(tg,"Test encountered an error");
+	REPORT_ERROR(tg,"Test encountered an error.","Mock test that simulates an error.");
 }
 
 static inline int integersAreEqual(int A,int B)
@@ -185,17 +186,17 @@ static inline int actionRunsMatch(int expectedActionRuns)
 {
     return state.counters.actionRun == expectedActionRuns;
 }
-
+#define REPORT_UNEXPECTED_RESULT(tg,message) REPORT_FAIL(tg,message,"Mock test run yielded unexpected results.")
 static inline void runAndAssert(TestGroup *tg, MockTestRunConfig *mtc, int actionRuns,int testRuns,const TestGroupOutcome *outcome)
 {
     const int outcomeAsExpected = MTR_runAndVerifyOutcome(mtc, outcome);
 
     if (!actionRunsMatch(actionRuns))
-        TG_fail(tg,"Action runs don't match expectations.");
+        REPORT_UNEXPECTED_RESULT(tg,"Action runs don't match expectations.");
     if (!testRunsMatch(testRuns))
-        TG_fail(tg,"Test runs don't match expectations.");
+        REPORT_UNEXPECTED_RESULT(tg,"Test runs don't match expectations.");
     if (!outcomeAsExpected)
-        TG_fail(tg,"Test outcomes are different than expected!");
+        REPORT_UNEXPECTED_RESULT(tg,"Test outcomes are different than expected!");
 
 }
 

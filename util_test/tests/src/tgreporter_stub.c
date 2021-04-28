@@ -22,15 +22,15 @@ static void pass(struct TGReporter *self)
 {
 	(void)self;
 }
-static void fail(struct TGReporter *self,const char *message)
+static void fail(struct TGReporter *self,const TestAssertion*ta)
 {
 	(void)self;
-	(void)message;
+	(void)ta;
 }
-static void error(struct TGReporter *self,const char *message)
+static void error(struct TGReporter *self,const TestAssertion *ta)
 {
 	(void)self;
-	(void)message;
+	(void)ta;
 }
 static void summary(struct TGReporter *self,const TestGroupOutcome *summary)
 {

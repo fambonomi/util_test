@@ -8,14 +8,14 @@
 #ifndef INCLUDE_TGREPORT_H_
 #define INCLUDE_TGREPORT_H_
 #include <test.h>
-
+#include <iassertion.h>
 struct TGReporter;
 
 typedef void (*TGReportBegin)(struct TGReporter *self,const char *groupName,int numTests);
 typedef void (*TGReportTest)(struct TGReporter *self,const char *testName);
 typedef void (*TGReportPass)(struct TGReporter *self);
-typedef void (*TGReportFail)(struct TGReporter *self,const char *message);
-typedef void (*TGReportError)(struct TGReporter *self,const char *message);
+typedef void (*TGReportFail)(struct TGReporter *self,const TestAssertion *ta);
+typedef void (*TGReportError)(struct TGReporter *self,const TestAssertion *ta);
 typedef void (*TGReportSummary)(struct TGReporter *self,const TestGroupOutcome *summary);
 
 typedef struct TGReporter{
@@ -51,20 +51,20 @@ static inline void TGR_reportPass(TGReporter *self)
 		self->pass(self);
 }
 
-static inline void TGR_reportFail(TGReporter *self,const char *message)
+static inline void TGR_reportFail(TGReporter *self,const TestAssertion *ta)
 {
 	const int pointerIsValid = (TGReportFail)0 != self->fail;
 
 	if (pointerIsValid)
-		self->fail(self,message);
+		self->fail(self,ta);
 }
 
-static inline void TGR_reportError(TGReporter *self,const char *message)
+static inline void TGR_reportError(TGReporter *self,const TestAssertion *ta)
 {
 	const int pointerIsValid = (TGReportError)0 != self->error;
 
 	if (pointerIsValid)
-		self->error(self,message);
+		self->error(self,ta);
 }
 
 static inline void TGR_reportSummary(TGReporter *self, const TestGroupOutcome *summary)

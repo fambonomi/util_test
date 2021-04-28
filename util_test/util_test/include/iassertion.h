@@ -15,7 +15,6 @@ typedef enum {TAO_EQ=0,TAO_NEQ, TAO_IS_TRUE, TAO_IS_FALSE, TAO_MAX=TAO_IS_FALSE}
 
 TAResult TA_getResult(const TestAssertion *self);
 TAKind TA_getKind(const TestAssertion *self);
-TAOperator TA_getOperator(const TestAssertion *self);
 const char * TA_getMessage(const TestAssertion *self);
 const char * TA_getReason(const TestAssertion *self);
 
