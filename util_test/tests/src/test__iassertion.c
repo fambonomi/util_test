@@ -10,23 +10,26 @@
 #include <stdint.h> /*intptr_t*/
 #include <test_run.h>
 
+#define DEBE_SER_CADENA_VALIDA(Campo) "Luego de inicializar, TA_get"Campo" debe ser una cadena válida"
 static inline void empty_assertion_consistency(
         TestGroup *tg,const TestAssertion *assertion,TAKind initKind)
 {
     const intptr_t nullPtr = (intptr_t)NULL;
-    ASSERT_INT_NOT_EQUAL(tg,"After initialization message should be a valid string",
+    ASSERT_INT_NOT_EQUAL(tg,DEBE_SER_CADENA_VALIDA("Message"),
             nullPtr,(intptr_t) TA_getMessage(assertion));
-    ASSERT_INT_NOT_EQUAL(tg,"After initialization reason should be a valid string",
+    ASSERT_INT_NOT_EQUAL(tg,DEBE_SER_CADENA_VALIDA("Reason"),
             nullPtr,(intptr_t) TA_getReason(assertion));
-    ASSERT_INT_NOT_EQUAL(tg,"After initialization file should be a valid string",
+    ASSERT_INT_NOT_EQUAL(tg,DEBE_SER_CADENA_VALIDA("File"),
             nullPtr,(intptr_t)TA_getFile(assertion));
-    ASSERT_INT_NOT_EQUAL(tg,"After initialization func should be a valid string",
+    ASSERT_INT_NOT_EQUAL(tg,DEBE_SER_CADENA_VALIDA("Func"),
             nullPtr,(intptr_t)TA_getFunc(assertion));
     ASSERT_INT_EQUAL(tg,"After initialization kind should be as specified in init",
             initKind,TA_getKind(assertion));
     ASSERT_INT_EQUAL(tg,"After initialization result should be Pass",
             TA_PASS,TA_getResult(assertion));
 }
+#undef DEBE_SER_CADENA_VALIDA
+
 static inline void test_empty_assertion_consistency(TestGroup *tg,TestAssertion *assertion,TAKind kind)
 {
     TA_init(assertion, kind);
@@ -44,32 +47,32 @@ static void test_empty_num_assertion(TestGroup *tg)
     TestAssertion assertion={0};
     test_empty_assertion_consistency(tg,&assertion, TAK_NUM);
 }
-
+#define PROPIEDAD_DEBE_SER(Propiedad,valor) "Luego de inicializar, TA_mem_get"Propiedad" debe ser "valor
 static void test_empty_mem_assertion(TestGroup *tg)
 {
     TestAssertion assertion={.detail={.mem_kind={.A=(void *)0x5a5a5a5a,.B=(void *)0x96969696}}};
     test_empty_assertion_consistency(tg,&assertion, TAK_MEM);
     const intptr_t nullPtr = (intptr_t) NULL;
 
-    ASSERT_INT_EQUAL(tg,"After initialization A should be a null pointer",
+    ASSERT_INT_EQUAL(tg,PROPIEDAD_DEBE_SER("PA","puntero nulo"),
             nullPtr,(intptr_t)TA_mem_getPA(&assertion));
-    ASSERT_INT_EQUAL(tg,"After initialization B should be a null pointer",
+    ASSERT_INT_EQUAL(tg,PROPIEDAD_DEBE_SER("PB","puntero nulo"),
             nullPtr,(intptr_t)TA_mem_getPB(&assertion));
-    ASSERT_INT_EQUAL(tg,"After initialization length should be 0",
+    ASSERT_INT_EQUAL(tg,PROPIEDAD_DEBE_SER("Length","0"),
             0,TA_mem_getLength(&assertion));
 }
-
+#undef PROPIEDAD_DEBE_SER
 static inline void test__result(TestGroup *tg,TAResult result)
 {
     TestAssertion assertion;
     const int validResult = result >= 0 && result <= TA_MAX;
 
-    ASSERT_TRUE(tg,"Improper usage of test__result!",validResult);
+    ASSERT_TRUE(tg,"[<El argumento 'result' debe ser TAResult válido>]",validResult);
 
     TA_init(&assertion, TAK_BOOL);
     TA_setResult(&assertion, result);
 
-    ASSERT_INT_EQUAL(tg,"TA_getResult (A) should give the result passed to TA_setResult (B)",
+    ASSERT_INT_EQUAL(tg,"TA_getResult (primer entero) debe coincidir con el dado a TA_setResult (segundo entero)",
             TA_getResult(&assertion),result);
 }
 static inline void test__invalidResult(TestGroup *tg,TAResult result)
@@ -77,12 +80,12 @@ static inline void test__invalidResult(TestGroup *tg,TAResult result)
     TestAssertion assertion;
     const int validResult = result >= 0 && result <= TA_MAX;
 
-    ASSERT_FALSE(tg,"Improper usage of test__invalidResult!",validResult);
+    ASSERT_FALSE(tg,"[<El argumento 'result' debe ser TAResult INVÁLIDO>]",validResult);
 
     TA_init(&assertion, TAK_BOOL);
     TA_setResult(&assertion, result);
 
-    ASSERT_INT_NOT_EQUAL(tg,"TA_getResult (A) shouldnt give the INVALID result passed to TA_setResult (B)",
+    ASSERT_INT_NOT_EQUAL(tg,"TA_getResult (primer entero) no debe ser el resultado inválido dado a TA_setResult (segundo entero)",
             TA_getResult(&assertion),result);
 
 }
@@ -113,11 +116,11 @@ static void test_positionParameters(TestGroup *tg)
     TA_setLine(&assertion,line);
     TA_setFunc(&assertion,func);
 
-    ASSERT_INT_EQUAL(tg,"A=TA_getFile() should be the NON-NULL pointer given to TA_setFile(B)",
+    ASSERT_INT_EQUAL(tg,"El puntero devuelto por TA_getFile (primer entero) debe ser el puntero no nulo dado a TA_setFile (segundo entero)",
             (intptr_t)TA_getFile(&assertion),(intptr_t)file);
-    ASSERT_INT_EQUAL(tg,"A=TA_getFunc() should be the NON-NULL pointer given to TA_setFunc(B)",
+    ASSERT_INT_EQUAL(tg,"El puntero devuelto por TA_getFunc (primer entero) debe ser el puntero no nulo dado a TA_setFunc (segundo entero)",
             (intptr_t)TA_getFunc(&assertion),(intptr_t)func);
-    ASSERT_INT_EQUAL(tg,"A=TA_getLine() should be the number given to TA_setLine(B)",
+    ASSERT_INT_EQUAL(tg,"El número devuelto por TA_getLine (primer entero) debe ser el número no negativo dado a TA_setLine (segundo entero)",
             TA_getLine(&assertion),line);
 
 }
@@ -135,26 +138,28 @@ static void test_invalidPositionParameters(TestGroup *tg)
     TA_setLine(&assertion,line);
     TA_setFunc(&assertion,func);
 
-    ASSERT_INT_NOT_EQUAL(tg,"A=TA_getFile() should be the default value if a NULL pointer is given to TA_setFile(B)",
+    ASSERT_INT_NOT_EQUAL(tg,"El puntero devuelto por TA_getFile (primer entero) debe ser un puntero no nulo cuando se da uno nulo a TA_setFile (segundo entero)",
             (intptr_t)TA_getFile(&assertion),(intptr_t)file);
-    ASSERT_INT_NOT_EQUAL(tg,"A=TA_getFunc() should be the default value if a NULL pointer is given to TA_setFunc(B)",
+    ASSERT_INT_NOT_EQUAL(tg,"El puntero devuelto por TA_getFunc (primer entero) debe ser un puntero no nulo cuando se da uno nulo a TA_setFunc (segundo entero)",
             (intptr_t)TA_getFunc(&assertion),(intptr_t)func);
-    ASSERT_INT_NOT_EQUAL(tg,"A=TA_getLine() should be 0 if a negative number given to TA_setLine(B)",
+    ASSERT_INT_NOT_EQUAL(tg,"El número devuelto por TA_getLine (primer entero) debe ser 0 cuando se dió un número negativo a TA_setLine (segundo entero)",
             TA_getLine(&assertion),line);
 
 }
 
+#define OPERADOR_DEBE_COINCIDIR(tipoAsercion) "El operador devuelto por TA_"tipoAsercion"_getOperator (primer entero) debe coincidir con el operador dado a TA_"tipoAsercion"_setOperator (segundo entero)."
 static inline void boolAssertion_testOperator(TestGroup *tg, TestAssertion *ta, TAOperator op)
 {
     TA_bool_setOperator(ta,op);
-    ASSERT_INT_EQUAL(tg,"Operator set (A) should coincide with operator gotten (B) in boolean assert details.",
-            op,TA_bool_getOperator(ta));
+    ASSERT_INT_EQUAL(tg,OPERADOR_DEBE_COINCIDIR("bool"),
+            TA_bool_getOperator(ta),op);
 }
+#define OPERANDO_DEBE_COINCIDIR(tipoAsercion,operando) "El operando devuelto por TA_"tipoAsercion"_get"operando" (primer entero) debe coincidir con el operador dado a TA_"tipoAsercion"_set"operando" (segundo entero)."
 static inline void boolAssertion_testOperand(TestGroup *tg, TestAssertion *ta, int A)
 {
     TA_bool_setA(ta,A);
-    ASSERT_INT_EQUAL(tg,"Operand set (A) should coincide with operand gotten (B) in boolean assert details.",
-            A,TA_bool_getA(ta));
+    ASSERT_INT_EQUAL(tg,OPERANDO_DEBE_COINCIDIR("bool","A"),
+            TA_bool_getA(ta),A);
 
 }
 static void test_boolAssertionOperator(TestGroup *tg)
@@ -177,18 +182,18 @@ static void test_boolAssertionOperand(TestGroup *tg)
 static inline void numAssertion_testOperator(TestGroup *tg,TestAssertion *ta, TAOperator op)
 {
     TA_num_setOperator(ta,op);
-    ASSERT_INT_EQUAL(tg,"Operator set (A) should coincide with operator gotten (B) in numeric assert details.",
-            op,TA_num_getOperator(ta));
+    ASSERT_INT_EQUAL(tg,OPERADOR_DEBE_COINCIDIR("num"),
+            TA_num_getOperator(ta),op);
 }
 
 static inline void numAssertion_testOperand(TestGroup *tg, TestAssertion *ta, long long int A, long long int B)
 {
     TA_num_setA(ta,A);
     TA_num_setB(ta,B);
-    ASSERT_INT_EQUAL(tg,"First operand value set (A) should coincide with value gotten (B) in numeric assert details.",
-            A,TA_num_getA(ta));
-    ASSERT_INT_EQUAL(tg,"Second operand value set (A) should coincide with value gotten (B) in numeric assert details.",
-            B,TA_num_getB(ta));
+    ASSERT_INT_EQUAL(tg,OPERANDO_DEBE_COINCIDIR("num","A"),
+            TA_num_getA(ta),A);
+    ASSERT_INT_EQUAL(tg,OPERANDO_DEBE_COINCIDIR("num","B"),
+            TA_num_getB(ta),B);
 
 }
 static void test_numAssertionOperator(TestGroup *tg)
@@ -213,8 +218,8 @@ static void test_numAssertionOperand(TestGroup *tg)
 static inline void memAssertion_testOperator(TestGroup *tg, TestAssertion *ta, TAOperator op)
 {
     TA_mem_setOperator(ta,op);
-    ASSERT_INT_EQUAL(tg,"Operator set (A) should coincide with operator gotten (B) in memory assert",
-            op,TA_mem_getOperator(ta));
+    ASSERT_INT_EQUAL(tg,OPERADOR_DEBE_COINCIDIR("mem"),
+            TA_mem_getOperator(ta),op);
 }
 static void test_memAssertionOperator(TestGroup *tg)
 {
@@ -229,14 +234,14 @@ static void test_memAssertionOperator(TestGroup *tg)
 static inline void memAssertion_testOperands(TestGroup *tg, TestAssertion *ta, const void *A,const void *B,size_t length)
 {
     TA_mem_setA(ta,A);
-    ASSERT_INT_EQUAL(tg,"First operand pointer address set (A) should coincide with addres gotten (B) in memory assert details.",
-            (intptr_t)A,(intptr_t)TA_mem_getA(ta));
+    ASSERT_INT_EQUAL(tg,OPERANDO_DEBE_COINCIDIR("mem","A"),
+            (intptr_t)TA_mem_getA(ta),(intptr_t)A);
     TA_mem_setB(ta,B);
-    ASSERT_INT_EQUAL(tg,"Second operand pointer address set (A) should coincide with addres gotten (B) in memory assert details.",
-            (intptr_t)B,(intptr_t)TA_mem_getB(ta));
+    ASSERT_INT_EQUAL(tg,OPERANDO_DEBE_COINCIDIR("mem","B"),
+            (intptr_t)TA_mem_getB(ta),(intptr_t)B);
     TA_mem_setLength(ta,length);
-    ASSERT_INT_EQUAL(tg,"Memory length set (A) should coincide with memory length gotten (B) in memory assert details.",
-            length,TA_mem_getLength(ta));
+    ASSERT_INT_EQUAL(tg,"La longitud devuelta por TA_mem_getLength (primer entero) debe coincidir con la dada a TA_mem_setLength (segundo entero).",
+            TA_mem_getLength(ta),length);
 
 }
 static void test_memAssertionOperands(TestGroup *tg)
@@ -254,14 +259,14 @@ static void test_memAssertionOperands(TestGroup *tg)
 static inline void assertion_testMessage(TestGroup *tg, TestAssertion *ta,const char*message)
 {
     TA_setMessage(ta,message);
-    ASSERT_INT_EQUAL(tg,"Message address set (A) should equal message address gotten (B) in assertion.",
-            (intptr_t)message,(intptr_t)TA_getMessage(ta));
+    ASSERT_INT_EQUAL(tg,"TA_getMessage (primer entero) debe devolver el puntero no nulo dado a TA_setMessage (segundo entero).",
+            (intptr_t)TA_getMessage(ta),(intptr_t)message);
 }
 static inline void assertion_testNullMessage(TestGroup *tg, TestAssertion *ta)
 {
     TA_setMessage(ta, NULL);
-    ASSERT_INT_NOT_EQUAL(tg,"When attempting to set message address to NULL (A) it should be set to default instead, gotten (B) in assertion",
-            (intptr_t)NULL,(intptr_t)TA_getMessage(ta));
+    ASSERT_INT_NOT_EQUAL(tg,"TA_getMessage (primer entero) debe devolver un puntero por defecto si se dió uno nulo a TA_setMessage (segundo entero)",
+            (intptr_t)TA_getMessage(ta),(intptr_t)NULL);
 }
 static void test_assertionMessage(TestGroup *tg)
 {
@@ -280,8 +285,8 @@ static void test_assertionNullMessage(TestGroup *tg)
 static inline void assertion_testReason(TestGroup *tg,TestAssertion *ta,const char * reason)
 {
     TA_setReason(ta,reason);
-    ASSERT_INT_EQUAL(tg,"Address of reason set (A) should coincide with address gotten (B) in assertion.",
-            (intptr_t)reason,(intptr_t)TA_getReason(ta));
+    ASSERT_INT_EQUAL(tg,"TA_getReason (primer entero) debe devolver el puntero no nulo dado a TA_setReason (segundo entero).",
+            (intptr_t)TA_getReason(ta),(intptr_t)reason);
 }
 
 static void test_assertionReason(TestGroup *tg)
@@ -294,8 +299,8 @@ static void test_assertionReason(TestGroup *tg)
 static inline void assertion_testNullReason(TestGroup *tg,TestAssertion *ta)
 {
     TA_setReason(ta,NULL);
-    ASSERT_INT_NOT_EQUAL(tg,"Attempted set address of reason (A) should result in reason being reset instead, gotten (B) in assertion.",
-            (intptr_t)NULL,(intptr_t)TA_getReason(ta));
+    ASSERT_INT_NOT_EQUAL(tg,"TA_getReason (primer entero) debe devolver un puntero por defecto si se da uno nulo a TA_setReason (segundo entero).",
+            (intptr_t)TA_getReason(ta),(intptr_t)NULL);
 
 }
 static void test_assertionNullReason(TestGroup *tg)
@@ -311,56 +316,59 @@ static void test_assertionSetKind(TestGroup *tg)
 
     TA_setKind(&assertion, TAK_MEM);
 
-    ASSERT_INT_EQUAL(tg,"After setting a new assertion king (A) it should be the new kind, gotten (B).",
-            TAK_MEM,TA_getKind(&assertion));
+    ASSERT_INT_EQUAL(tg,"TA_getKind (primer entero) debe devolver el valor dado a la última llamada a TA_setKind (segundo entero).",
+            TA_getKind(&assertion),TAK_MEM);
 }
 
+#define NO_ESTABLECER_TIPO_INVALIDO(setter) "TA_getKind (primer entero) debe devolver el valor por defecto si se suministró un dato inválido a "setter" (segundo entero)"
 static void test_assertionInvalidKind(TestGroup *tg)
 {
-    const char *const msg="Attempting to set assertion kind to value out of range (A) should result in its reset instead, gotten (B)";
     TestAssertion assertion = {0};
     const int invalidKind = TAK_MAX+1;
     TA_init(&assertion,invalidKind);
 
-    ASSERT_INT_NOT_EQUAL(tg,msg,invalidKind,TA_getKind(&assertion));
+    ASSERT_INT_NOT_EQUAL(tg,NO_ESTABLECER_TIPO_INVALIDO("TA_init"),TA_getKind(&assertion),invalidKind);
 
     TA_setKind(&assertion, invalidKind);
 
-    ASSERT_INT_NOT_EQUAL(tg,msg,invalidKind,TA_getKind(&assertion));
+    ASSERT_INT_NOT_EQUAL(tg,NO_ESTABLECER_TIPO_INVALIDO("TA_setKind"),TA_getKind(&assertion),invalidKind);
 
 }
+#undef NO_ESTABLECER_TIPO_INVALIDO
+
+
 static void test_assertionDirectKind(TestGroup *tg)
 {
-    const char *const msg="After setting assertion kind to TAK_DIRECT (A) the assertion kind should be that value, gotten (B)";
+    const char *const msg="TA_getKind (primer entero) debe devolver correctamente el tipo establecido por TA_init a TAK_DIRECT (segundo entero)";
     TestAssertion assertion = {0};
     TA_init(&assertion,TAK_DIRECT);
 
-    ASSERT_INT_EQUAL(tg,msg,TAK_DIRECT,TA_getKind(&assertion));
+    ASSERT_INT_EQUAL(tg,msg,TA_getKind(&assertion),TAK_DIRECT);
 
 }
 static TestDescriptor tests[]=
 {
-        {"Bool assertion struct state after initialization",test_empty_bool_assertion},
-        {"Num assertion struct state after initialization",test_empty_num_assertion},
-        {"Mem assertion struct state after initialization",test_empty_mem_assertion},
-        {"TA_getResult returns the VALID result given to TA_setResult",test_assertionResult},
-        {"TA_getResult doesn't return the INVALID result given to TA_setResult",test_assertionInvalidResult},
-        {"Correct position parameters are returned as they were set",test_positionParameters},
-        {"Invalid position parameters are not set, default values are set instead",test_invalidPositionParameters},
-        {"Boolean assertion operator data",test_boolAssertionOperator},
-        {"Boolean assertion operand data",test_boolAssertionOperand},
-        {"Numerical assertion operator data",test_numAssertionOperator},
-        {"Numerical assertion operand data",test_numAssertionOperand},
-        {"Memory assertion operator data",test_memAssertionOperator},
-        {"Memory assertion operand data",test_memAssertionOperands},
-        {"Assertion message is correctly set",test_assertionMessage},
-        {"Assertion message address cannot be set to NULL",test_assertionNullMessage},
-        {"Assertion reason is correctly set",test_assertionReason},
-        {"Assertion reason address cannot be set to NULL",test_assertionNullReason},
-        {"It should be possible to set a new assertion kind with setKind",test_assertionSetKind},
-        {"Attempting to set assertion kind to a value out of range should instead set it to a default value",
+        {"Datos de aserción bool después de inicializar",test_empty_bool_assertion},
+        {"Datos de aserción num después de inicializar",test_empty_num_assertion},
+        {"Datos de aserción mem después de inicializar",test_empty_mem_assertion},
+        {"TA_getResult retorna el resultado válido dado a TA_setResult",test_assertionResult},
+        {"TA_getResult retorna resultado por defecto si se dió uno inválido a TA_setResult",test_assertionInvalidResult},
+        {"Se respetan los parámetros de posición correctos dados",test_positionParameters},
+        {"Si se dan parámetros de posición inválidos son reemplazados por valores por defecto",test_invalidPositionParameters},
+        {"Datos de operador de aserción bool",test_boolAssertionOperator},
+        {"Datos de operando de aserción bool",test_boolAssertionOperand},
+        {"Datos de operador de aserción num",test_numAssertionOperator},
+        {"Datos de operandos de aserción num",test_numAssertionOperand},
+        {"Datos de operador de aserción mem",test_memAssertionOperator},
+        {"Datos de operandos de aserción mem",test_memAssertionOperands},
+        {"Establece el mensaje de aserción correctamente",test_assertionMessage},
+        {"No establece un puntero nulo como mensaje de aserción, usar valor por defecto en su lugar",test_assertionNullMessage},
+        {"Establece la razón correctamente",test_assertionReason},
+        {"No establece un puntero nulo como razón, usar valor por defecto en su lugar",test_assertionNullReason},
+        {"Debe ser posible cambiar el tipo de aserción reportado con TA_setKind",test_assertionSetKind},
+        {"No debe establecer un tipo de aserción no válido, usar valor por defecto en su lugar",
         test_assertionInvalidKind},
-        {"Direct assertion kind (for assertion results without details) should be a valid kind",
+        {"El tipo de aserción TA_DIRECT (para reportar resultados sin detalle) debe ser un tipo válido",
                 test_assertionDirectKind},
 };
 static const int numTests = sizeof(tests)/sizeof(*tests);
@@ -368,13 +376,15 @@ static const int numTests = sizeof(tests)/sizeof(*tests);
  * public interface
  */
 
-int testRun_assertionInterface(void)
+void testRun_assertionInterface(TestGroup *base)
 {
     static TestGroup tg;
-    TG_init(&tg, "Assertion interface tests");
+    TG_init(&tg, "Pruebas de interfaz de reporte de resultados de aserción");
     TG_setTests(&tg, tests, numTests);
+
+    TG_setReportPlugin(&tg, SubgrupoReporter_comoTGReporter(reporterGrupo()));
 
     TG_runTests(&tg);
 
-    return !TG_allTestsPassed(&tg);
+    ASSERT_TRUE(base,"Todas las pruebas de la interfaz de reporte de resultados de aserción fueron exitosas",TG_allTestsPassed(&tg));
 }

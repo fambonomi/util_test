@@ -13,6 +13,7 @@
 
 static struct EstadoTests_TestGroup{
 	TestGroup grupo;
+	TGReporter *reporter;
 	int falla;
 	struct{
 		int inicializaciones;
@@ -27,7 +28,10 @@ static struct EstadoTests_TestGroup{
 /**
  * Funciones estáticas -- para uso interno
  */
-
+static void nuevaLinea(void)
+{
+    printf("\n  | ");
+}
 static inline void registraEjecucion(void)
 {
 	++estado.contadores.pruebasEjecutadas;
@@ -141,7 +145,9 @@ static inline int existePunteroDatoEnMemoria(const void *memoria,size_t bytesMem
 
 inline static void reportaFalla(const char *mensaje)
 {
-	printf("[FALLA] %s\n",mensaje);
+	printf(" [FALLA]");
+	nuevaLinea();
+    printf(mensaje);
 	estado.falla = 1;
 }
 static inline void inicializaVariablesTestigo(void)
@@ -171,6 +177,10 @@ static inline void verificaConsistenciaInicializacion(void) {
 	if (!existePunteroDatoEnMemoria(&estado.grupo, sizeof(estado.grupo), pruebas))
 		reportaFalla(
 				"No existe puntero a lista de pruebas en el estado de grupo de prueba!");
+
+	if (!existePunteroDatoEnMemoria(&estado.grupo, sizeof(estado.grupo), estado.reporter))
+        reportaFalla(
+                "No existe puntero a reporter suministrado en el estado de grupo de prueba!");
 
 	if (!existePatronEnMemoria(&estado.grupo, sizeof(estado.grupo), &numPruebas,
 			sizeof(numPruebas)))
@@ -225,8 +235,8 @@ static inline void verificaResultados(void)
 static inline void inicializaPruebas(void)
 {
 	inicializaVariablesTestigo();
-
-	printf("%d pruebas definidas\n",numPruebas);
+    nuevaLinea();
+	printf("%d pruebas definidas",numPruebas);
 
 	rellenaConValorTestigo(&estado.grupo,sizeof(estado.grupo));
 
@@ -242,6 +252,9 @@ static inline void inicializaPruebas(void)
 
 	TG_setTests(&estado.grupo,pruebas,numPruebas);
 
+	TG_setReportPlugin(&estado.grupo, estado.reporter);
+
+
 	verificaConsistenciaInicializacion();
 }
 
@@ -250,20 +263,30 @@ static inline void descartaDosPruebas(void)
 	if(numPruebas>2) numPruebas-=2;
 }
 
+static void indicaOk(void)
+{
+    printf("  | %s",estado.falla ? "":"[OK]");
+}
 
 /**
  * API visible desde el exterior
  */
 
-int testRun_TestGroup_base(void)
+void testRun_TestGroup_base(TestGroup *base)
 {
+    static SubgrupoReporter sgr;
+
+    SubgrupoReporter_init_conBase(&sgr, reporterGrupo(), "  | ");
+    estado.reporter = SubgrupoReporter_comoTGReporter(&sgr);
 	estado.falla = 0;
-	printf("--INICIO--\n");
-	printf("Pruebas de la funcionalidad báse del grupo de pruebas.\n\n");
+	nuevaLinea();
+	printf("Pruebas de la funcionalidad báse del grupo de pruebas.");
+    nuevaLinea();
 	inicializaPruebas();
 	TG_runTests(&estado.grupo);
 	verificaEjecucion();
 	verificaResultados();
+	indicaOk();
 
 	descartaDosPruebas();
 
@@ -271,13 +294,17 @@ int testRun_TestGroup_base(void)
 	TG_runTests(&estado.grupo);
 	verificaEjecucion();
 	verificaResultados();
+    indicaOk();
 
-	if (!estado.falla)
-		printf("\nPasaron todas las pruebas base.\n");
-	else
-		printf("\nFallaron las pruebas base.\n");
-
+	if (!estado.falla){
+	    nuevaLinea();
+	    printf("Pasaron todas las pruebas base.");
+	}else{
+	    nuevaLinea();
+	    printf("Fallaron las pruebas base.");
+	}
+    nuevaLinea();
 	printf("--FIN--\n");
 
-	return estado.falla;
+	ASSERT_FALSE(base,"Pasaron todas las pruebas base",estado.falla);
 }

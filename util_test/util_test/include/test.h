@@ -11,16 +11,16 @@
 #include <iassertion.h>
 #include <stddef.h> /*size_t*/
 /* Declara que existe una struct TestGroup definida luego */
-struct TestGroup;
+typedef struct TestGroup TestGroup;
 
 /**
  * struct plugin de salida
  */
-struct TGReporter;
+typedef struct TGReporter TGReporter;
 
 /* Punteros a función par prueba, incialización y finalización*/
 
-typedef void (*TG_Test)(struct TestGroup*);
+typedef void (*TG_Test)(TestGroup* tg);
 typedef TG_Test TG_Before;
 typedef TG_Test TG_After;
 
@@ -43,7 +43,7 @@ typedef struct TestGroupOutcome{
 typedef struct TestGroup
 {
 	const char * groupName;
-	struct TGReporter *reportPlugin;
+	TGReporter *reportPlugin;
 	struct{
 		TG_Before beforeGroup;
 		TG_After afterGroup;
@@ -64,7 +64,7 @@ typedef struct TestGroup
 
 void TG_init(TestGroup *self, const char *groupName);
 
-void TG_setReportPlugin(TestGroup *self, struct TGReporter *plugin);
+void TG_setReportPlugin(TestGroup *self, TGReporter *plugin);
 void TG_setBeforeGroupAction(TestGroup *self, TG_Before beginGroup);
 void TG_setAfterGroupAction(TestGroup *self, TG_After afterGroup);
 void TG_setBeforeTestAction(TestGroup *self,TG_Before beforeTest);

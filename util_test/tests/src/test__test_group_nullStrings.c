@@ -9,6 +9,8 @@
 #include <assertions.h>
 #include <test_run.h>
 
+static TGReporter *reporterSubgrupo;
+
 static void stub_test(TestGroup *tg)
 {
 	(void)tg;
@@ -27,18 +29,24 @@ static inline void assertOutcomesAreEqual(TestGroup *tg,
 	if (!outcomesAreEqual)
 		REPORT_FAIL(tg, message,"Mock tests outcome was different than expected.");
 }
+static void initAndRunTests(TestGroup *mockGroup,const char *name, TestDescriptor *tests,int numTests)
+{
+    TG_init(mockGroup, name);
+    TG_setTests(mockGroup, tests, numTests);
+    TG_setReportPlugin(mockGroup, reporterSubgrupo);
+    TG_runTests(mockGroup);
+
+}
 static void test_unamedGroup(TestGroup *tg)
 {
-	TestGroup mockGroup;
+    TestGroup mockGroup;
 	TestDescriptor tests[] ={{"named test",stub_test}};
 
-	TG_init(&mockGroup, NULL);
-	TG_setTests(&mockGroup, tests, 1);
-	TG_runTests(&mockGroup);
+	initAndRunTests(&mockGroup,NULL,tests,1);
 
 	const TestGroupOutcome expectedOutcome ={.error=0,.failed=0,.passed=1,.run=1};
 	const TestGroupOutcome *actualOutcome = TG_getTestOutcome(&mockGroup);
-	assertOutcomesAreEqual(tg,"Test group with null name didn't run as expected!",
+	assertOutcomesAreEqual(tg,"Un grupo con nombre nulo debe ejecutarse normalmente",
 			&expectedOutcome, actualOutcome);
 }
 static void test_nullFP(TestGroup *tg)
@@ -46,13 +54,11 @@ static void test_nullFP(TestGroup *tg)
     TestGroup mockGroup;
     TestDescriptor tests[] ={{"named test",(TG_Test)0}};
 
-    TG_init(&mockGroup, "Group with a null FP");
-    TG_setTests(&mockGroup, tests, 1);
-    TG_runTests(&mockGroup);
+    initAndRunTests(&mockGroup, "Grupo con un puntero a función nulo", tests, 1);
 
     const TestGroupOutcome expectedOutcome ={.error=1,.failed=0,.passed=0,.run=1};
     const TestGroupOutcome *actualOutcome = TG_getTestOutcome(&mockGroup);
-    assertOutcomesAreEqual(tg,"Test group with null function pointer didn't run as expected!",
+    assertOutcomesAreEqual(tg,"Una prueba con puntero a función nulo en su descriptor debe generar un error",
             &expectedOutcome, actualOutcome);
 }
 static void test_unnamedTest(TestGroup *tg)
@@ -60,13 +66,11 @@ static void test_unnamedTest(TestGroup *tg)
     TestGroup mockGroup;
     TestDescriptor tests[] ={{NULL,stub_test}};
 
-    TG_init(&mockGroup, "Group with a null FP");
-    TG_setTests(&mockGroup, tests, 1);
-    TG_runTests(&mockGroup);
+    initAndRunTests(&mockGroup, "Grupo con un puntero a nombre de prueba", tests, 1);
 
     const TestGroupOutcome expectedOutcome ={.error=0,.failed=0,.passed=1,.run=1};
     const TestGroupOutcome *actualOutcome = TG_getTestOutcome(&mockGroup);
-    assertOutcomesAreEqual(tg,"Test having a test with null name didn't run as expected!",
+    assertOutcomesAreEqual(tg,"Una prueba cuyo nombre es un puntero nulo en el descriptor debe ejecutarse normalmente",
             &expectedOutcome, actualOutcome);
 }
 
@@ -75,32 +79,35 @@ static void test_nullDescriptor(TestGroup *tg)
     TestGroup mockGroup;
     TestDescriptor *tests =NULL;
 
-    TG_init(&mockGroup, "Group with a null test descriptor should do nothing");
-    TG_setTests(&mockGroup, tests, 1);
-    TG_runTests(&mockGroup);
+    initAndRunTests(&mockGroup, "Grupo con puntero a descriptores de pruebas nulo", tests, 1);
 
     const TestGroupOutcome expectedOutcome ={.error=0,.failed=0,.passed=0,.run=0};
     const TestGroupOutcome *actualOutcome = TG_getTestOutcome(&mockGroup);
-    assertOutcomesAreEqual(tg,"Test having a null test descriptor didn't run as expected!",
+    assertOutcomesAreEqual(tg,"Si el puntero a descriptores de pruebas es nulo el grupo no debe ejecutarse",
             &expectedOutcome, actualOutcome);
 }
 
 
-int testRun_TestGroup_nullStrings(void)
+void testRun_TestGroup_nullStrings(TestGroup *base)
 {
 	TestGroup group;
 	static TestDescriptor tests[]={
-			{"Group with null name shall run normally.",test_unamedGroup},
-			{"Group with a null function pointer should give an error for that function.",test_nullFP},
-			{"Group with a test with null name",test_unnamedTest},
-			{"Null test descriptor",test_nullDescriptor},
+			{"Grupo cuyo nombre es puntero nulo debe ejecutarse con normalidad",test_unamedGroup},
+			{"Una prueba cuyo puntero a función de prueba es nulo debe generar un error",test_nullFP},
+			{"Si el nombre de una prueba es un puntero nulo, no debe afectar su funcionamiento",test_unnamedTest},
+			{"Si el puntero a descriptores de prueba es nulo el grupo no debe ejecutarse",test_nullDescriptor},
 	};
 	static int numTests = sizeof(tests)/sizeof(*tests);
-	TG_init(&group,NULL);
-	TG_setTests(&group, tests, numTests);
 
+	static SubgrupoReporter sbr;
+	SubgrupoReporter_init_conBase(&sbr, reporterGrupo(), "  | ");
+	reporterSubgrupo = SubgrupoReporter_comoTGReporter(&sbr);
+
+	TG_init(&group,"Ensayo de punteros nulos en definición de grupo de pruebas");
+	TG_setTests(&group, tests, numTests);
+	TG_setReportPlugin(&group, SubgrupoReporter_comoTGReporter(reporterGrupo()));
 	TG_runTests(&group);
 
-	// a return of zero means all tests passed
-	return !TG_allTestsPassed(&group);
+	ASSERT_TRUE(base,"Pasaron las pruebas de punteros nulos",
+	        TG_allTestsPassed(&group));
 }

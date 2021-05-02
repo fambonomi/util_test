@@ -187,17 +187,18 @@ static inline int actionRunsMatch(int expectedActionRuns)
 {
     return state.counters.actionRun == expectedActionRuns;
 }
-#define REPORT_UNEXPECTED_RESULT(tg,message) REPORT_FAIL(tg,message,"Mock test run yielded unexpected results.")
-static inline void runAndAssert(TestGroup *tg, MockTestRunConfig *mtc, int actionRuns,int testRuns,const TestGroupOutcome *outcome)
+#define REPORT_UNEXPECTED_RESULT(tg,message,func,file,line) TG_fail(tg,message,"Una ejecución de grupo de pruebas mock dio un resultado inesperado.",func,file,line)
+#define RUN_AND_ASSERT(tg,mtc,actionRuns,testRuns,outcome) runAndAssert(tg,mtc,actionRuns,testRuns,outcome,__func__,__FILE__,__LINE__)
+static inline void runAndAssert(TestGroup *tg, MockTestRunConfig *mtc, int actionRuns,int testRuns,const TestGroupOutcome *outcome,const char *func,const char *file, int line)
 {
     const int outcomeAsExpected = MTR_runAndVerifyOutcome(mtc, outcome);
 
     if (!actionRunsMatch(actionRuns))
-        REPORT_UNEXPECTED_RESULT(tg,"Action runs don't match expectations.");
+        REPORT_UNEXPECTED_RESULT(tg,"Las acciones no se ejecutaron en la forma programada.",func,file,line);
     if (!testRunsMatch(testRuns))
-        REPORT_UNEXPECTED_RESULT(tg,"Test runs don't match expectations.");
+        REPORT_UNEXPECTED_RESULT(tg,"La ejecución de pruebas fue distinta de los esperado.",func,file,line);
     if (!outcomeAsExpected)
-        REPORT_UNEXPECTED_RESULT(tg,"Test outcomes are different than expected!");
+        REPORT_UNEXPECTED_RESULT(tg,"Los resultados del grupo de pruebas no fueron los esperados.",func,file,line);
 
 }
 
@@ -217,7 +218,7 @@ static void test_BeforeTestActionSucceed(TestGroup *tg)
             .error=NUM_MOCK_ERROR};
 	const int beforeActionRuns = NUM_MOCK_TESTS;
 	const int testRuns = NUM_MOCK_TESTS;
-	runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
+	RUN_AND_ASSERT(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 
 }
 
@@ -236,7 +237,7 @@ static void test_BeforeTestActionFail(TestGroup *tg)
 
     const int beforeActionRuns = NUM_MOCK_TESTS;
     const int testRuns = 0;
-    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeTestActionError(TestGroup *tg)
@@ -254,7 +255,7 @@ static void test_BeforeTestActionError(TestGroup *tg)
 
     const int beforeActionRuns = NUM_MOCK_TESTS;
     const int testRuns = 0;
-    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 static void test_AfterTestActionSucceed(TestGroup *tg)
 {
@@ -271,7 +272,7 @@ static void test_AfterTestActionSucceed(TestGroup *tg)
 
     const int afterActionRuns = NUM_MOCK_TESTS;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterTestActionFail(TestGroup *tg)
@@ -289,7 +290,7 @@ static void test_AfterTestActionFail(TestGroup *tg)
 
     const int afterActionRuns = NUM_MOCK_TESTS;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterTestActionError(TestGroup *tg)
@@ -307,7 +308,7 @@ static void test_AfterTestActionError(TestGroup *tg)
 
     const int afterActionRuns = NUM_MOCK_TESTS;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeGroupActionSucceed(TestGroup *tg)
@@ -325,7 +326,7 @@ static void test_BeforeGroupActionSucceed(TestGroup *tg)
 
     const int beforeActionRuns = 1;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeGroupActionFail(TestGroup *tg)
@@ -343,7 +344,7 @@ static void test_BeforeGroupActionFail(TestGroup *tg)
 
     const int beforeActionRuns = 1;
     const int testRuns = 0;
-    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_BeforeGroupActionError(TestGroup *tg)
@@ -357,7 +358,7 @@ static void test_BeforeGroupActionError(TestGroup *tg)
 
     const int beforeActionRuns = 1;
     const int testRuns = 0;
-    runAndAssert(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, beforeActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterGroupActionSuccess(TestGroup *tg)
@@ -375,7 +376,7 @@ static void test_AfterGroupActionSuccess(TestGroup *tg)
 
     const int afterActionRuns = 1;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterGroupActionFail(TestGroup *tg)
@@ -393,7 +394,7 @@ static void test_AfterGroupActionFail(TestGroup *tg)
 
     const int afterActionRuns = 1;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 
 static void test_AfterGroupActionError(TestGroup *tg)
@@ -411,33 +412,34 @@ static void test_AfterGroupActionError(TestGroup *tg)
 
     const int afterActionRuns = 1;
     const int testRuns = NUM_MOCK_TESTS;
-    runAndAssert(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
+    RUN_AND_ASSERT(tg, &mtc, afterActionRuns, testRuns, &expectedOutcome);
 }
 static TestDescriptor tests[]={
-		{"Run action that succeeds before each test",test_BeforeTestActionSucceed},
-		{"Run action that fails before each test",test_BeforeTestActionFail},
-		{"Run action that encounters error before each test",test_BeforeTestActionError},
-		{"Run action that succeeds after each test",test_AfterTestActionSucceed},
-		{"Run action that fails after each test",test_AfterTestActionFail},
-		{"Run action that declares an error after each test",test_AfterTestActionError},
-		{"Run action that succeeds before the test group",test_BeforeGroupActionSucceed},
-        {"Run action that fails before the test group",test_BeforeGroupActionFail},
-        {"Run action that declares an error before the test group",test_BeforeGroupActionError},
-        {"Run action that succeeds after the test group",test_AfterGroupActionSuccess},
-        {"Run action that fails after the test group",test_AfterGroupActionFail},
-        {"Run action that declares an error after the test group",test_AfterGroupActionError},
+		{"Ejecuta acción exitosa antes de cada prueba",test_BeforeTestActionSucceed},
+		{"Ejecuta acción que falla antes de intentar cada prueba",test_BeforeTestActionFail},
+		{"Ejecuta acción que declara un error antes de intentar cada prueba",test_BeforeTestActionError},
+		{"Ejecuta acción exitosa después de cada prueba",test_AfterTestActionSucceed},
+		{"Ejecuta acción que falla después de cada prueba",test_AfterTestActionFail},
+		{"Ejecuta acción que declara un error después de cada prueba",test_AfterTestActionError},
+		{"Ejecuta acción exitosa antes del grupo de pruebas",test_BeforeGroupActionSucceed},
+        {"Ejecuta acción que falla antes del grupo de pruebas",test_BeforeGroupActionFail},
+        {"Ejecuta acción que declara un error antes del grupo de pruebas",test_BeforeGroupActionError},
+        {"Ejecuta acción exitosa después del grupo de pruebas",test_AfterGroupActionSuccess},
+        {"Ejecuta acción que falla después del grupo de pruebas",test_AfterGroupActionFail},
+        {"Ejecuta acción que declara un error después del grupo de pruebas",test_AfterGroupActionError},
 };
 static int numTests = sizeof(tests)/sizeof(*tests);
 
 
 
-int testRun_TestGroup_beforeAndAfter(void)
+void testRun_TestGroup_beforeAndAfter(TestGroup *base)
 {
 	TestGroup * tg = &state.tg;
-	TG_init(tg,"Test additional functions of TestGroup runner");
+	TG_init(tg,"Pruebas de acciones antes y después de grupos y de pruebas.");
 	TG_setTests(tg, tests, numTests);
-
+	TG_setReportPlugin(tg, SubgrupoReporter_comoTGReporter(reporterGrupo()));
 	TG_runTests(tg);
 
-	return TG_countErrors(tg)+TG_countFailed(tg);
+	ASSERT_TRUE(base,"Pasaron las pruebas de acciones de antes y después",
+	        TG_allTestsPassed(tg));
 }
