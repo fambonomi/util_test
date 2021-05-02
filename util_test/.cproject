@@ -11,13 +11,13 @@
                     					
                     <externalSetting>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Banco_de_prueba"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/util_test"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Debug"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Debug"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Debug_with_MCU ARM GCC"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Debug_with_MCU ARM GCC"/>
                         						
-                        <entry flags="RESOLVED" kind="libraryFile" name="Banco_de_prueba" srcPrefixMapping="" srcRootPath=""/>
+                        <entry flags="RESOLVED" kind="libraryFile" name="util_test" srcPrefixMapping="" srcRootPath=""/>
                         					
                     </externalSetting>
                     				
@@ -49,7 +49,7 @@
                             							
                             <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform.1697725433" isAbstract="false" osList="all" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform"/>
                             							
-                            <builder buildPath="${workspace_loc:/Banco_de_prueba}/Debug_with_MCU ARM GCC" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.1072413502" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
+                            <builder buildPath="${workspace_loc:/util_test}/Debug_with_MCU ARM GCC" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.1072413502" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
                             							
                             <tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.1056061123" name="MCU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler">
                                 								
@@ -137,13 +137,13 @@
                     					
                     <externalSetting>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Banco_de_prueba"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/util_test"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Release"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Release"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Release_with_MCU ARM GCC"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Release_with_MCU ARM GCC"/>
                         						
-                        <entry flags="RESOLVED" kind="libraryFile" name="Banco_de_prueba" srcPrefixMapping="" srcRootPath=""/>
+                        <entry flags="RESOLVED" kind="libraryFile" name="util_test" srcPrefixMapping="" srcRootPath=""/>
                         					
                     </externalSetting>
                     				
@@ -175,7 +175,7 @@
                             							
                             <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform.1987687255" isAbstract="false" osList="all" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.targetplatform"/>
                             							
-                            <builder buildPath="${workspace_loc:/Banco_de_prueba}/Release_with_MCU ARM GCC" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.1449929418" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
+                            <builder buildPath="${workspace_loc:/util_test}/Release_with_MCU ARM GCC" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.1449929418" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
                             							
                             <tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.493666645" name="MCU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler">
                                 								
@@ -257,13 +257,13 @@
                     					
                     <externalSetting>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Banco_de_prueba"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/util_test"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Debug"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Debug"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Debug_with_MinGW GCC"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Debug_with_MinGW GCC"/>
                         						
-                        <entry flags="RESOLVED" kind="libraryFile" name="Banco_de_prueba" srcPrefixMapping="" srcRootPath=""/>
+                        <entry flags="RESOLVED" kind="libraryFile" name="util_test" srcPrefixMapping="" srcRootPath=""/>
                         					
                     </externalSetting>
                     				
@@ -291,7 +291,7 @@
                             							
                             <targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.lib.debug.193289154" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.lib.debug"/>
                             							
-                            <builder buildPath="${workspace_loc:/Banco_de_prueba}/Debug_with_MinGW GCC" id="cdt.managedbuild.tool.gnu.builder.mingw.base.652667174" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
+                            <builder buildPath="${workspace_loc:/util_test}/Debug_with_MinGW GCC" id="cdt.managedbuild.tool.gnu.builder.mingw.base.652667174" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug.1372526966" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.lib.debug">
                                 								
@@ -357,13 +357,13 @@
                     					
                     <externalSetting>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/Banco_de_prueba"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/util_test"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Release"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Release"/>
                         						
-                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/Banco_de_prueba/Release_with_MinGW GCC"/>
+                        <entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/util_test/Release_with_MinGW GCC"/>
                         						
-                        <entry flags="RESOLVED" kind="libraryFile" name="Banco_de_prueba" srcPrefixMapping="" srcRootPath=""/>
+                        <entry flags="RESOLVED" kind="libraryFile" name="util_test" srcPrefixMapping="" srcRootPath=""/>
                         					
                     </externalSetting>
                     				
@@ -391,7 +391,7 @@
                             							
                             <targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.lib.release.749140898" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.lib.release"/>
                             							
-                            <builder buildPath="${workspace_loc:/Banco_de_prueba}/Release_with_MinGW GCC" id="cdt.managedbuild.tool.gnu.builder.mingw.base.2007901425" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
+                            <builder buildPath="${workspace_loc:/util_test}/Release_with_MinGW GCC" id="cdt.managedbuild.tool.gnu.builder.mingw.base.2007901425" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.assembler.mingw.lib.release.961634305" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.lib.release">
                                 								
@@ -479,7 +479,7 @@
                             							
                             <targetPlatform id="cdt.managedbuild.target.gnu.platform.mingw.exe.debug.914518484" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.mingw.exe.debug"/>
                             							
-                            <builder buildPath="${workspace_loc:/Banco_de_prueba}/Test_Banco_de_prueba" id="cdt.managedbuild.tool.gnu.builder.mingw.base.604186827" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
+                            <builder buildPath="${workspace_loc:/util_test}/Test_util_test" id="cdt.managedbuild.tool.gnu.builder.mingw.base.604186827" keepEnvironmentInBuildfile="false" name="CDT Internal Builder" superClass="cdt.managedbuild.tool.gnu.builder.mingw.base"/>
                             							
                             <tool id="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug.677526171" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.mingw.exe.debug">
                                 								
@@ -599,7 +599,7 @@
     	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="Banco_de_prueba.com.st.stm32cube.ide.mcu.gnu.managedbuild.projecttype.lib.108530666" name="Static Library" projectType="com.st.stm32cube.ide.mcu.gnu.managedbuild.projecttype.lib"/>
+        <project id="util_test.com.st.stm32cube.ide.mcu.gnu.managedbuild.projecttype.lib.108530666" name="Static Library" projectType="com.st.stm32cube.ide.mcu.gnu.managedbuild.projecttype.lib"/>
         	
     </storageModule>
     	
