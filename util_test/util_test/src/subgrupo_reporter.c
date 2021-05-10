@@ -130,6 +130,7 @@ static void error(struct TGReporter *super,const TestAssertion *ta)
 static void summary(struct TGReporter *super,const TestGroupOutcome *summary)
 {
     SubgrupoReporter *self = (SubgrupoReporter*)super;
+    const int esSubGrupo = NULL != self->base;
     lineaNueva(self);
     lineaNueva(self);
     printf("Pruebas ejecutadas: %d",summary->run);
@@ -141,6 +142,8 @@ static void summary(struct TGReporter *super,const TestGroupOutcome *summary)
     printf("Errores ocurridos: %d",summary->error);
     lineaNueva(self);
     printf("Fin de grupo\n");
+    if (esSubGrupo)
+        prefijo(self->base);
 }
 
 
